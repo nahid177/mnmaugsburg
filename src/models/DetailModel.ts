@@ -12,17 +12,21 @@ const MediaTypeSchema = new Schema<MediaType>({
   video: { type: String, required: false },
 });
 
-// Define Content Type and Schema
+// Define Content Type and Schema with subtitle and subdetail as arrays
 type Content = {
-  _id?: Types.ObjectId; // Optional ID field for embedded subdocuments
-  title: string;        // Title or big title
-  detail: string;       // Detailed description or content
-  media?: MediaType;    // Media can be an image or video
+  _id?: Types.ObjectId;      // Optional ID field for embedded subdocuments
+  title: string;             // Title or big title
+  detail: string;            // Detailed description or content
+  subtitle?: string[];       // Optional array of subtitles
+  subdetail?: string[];      // Optional array of subdetails
+  media?: MediaType;         // Media can be an image or video
 };
 
 const ContentSchema = new Schema<Content>({
   title: { type: String, required: true },
   detail: { type: String, required: true },
+  subtitle: { type: [String], required: false },  // Optional array of subtitles
+  subdetail: { type: [String], required: false }, // Optional array of subdetails
   media: { type: MediaTypeSchema, required: false },
 });
 
@@ -44,14 +48,14 @@ interface IModel extends Document {
   typename: string;          // Type name
   bigTitleName: string;      // Name for the big title section
   bigTitle: Content[];       // Array of Content items
-  category?: Category;       // Optional category
+  categories?: Category[];   // Optional array of categories
 }
 
 const ModelSchema = new Schema<IModel>({
   typename: { type: String, required: true },
   bigTitleName: { type: String, required: true },
   bigTitle: { type: [ContentSchema], required: true },
-  category: { type: CategorySchema, required: false },
+  categories: { type: [CategorySchema], required: false }, // Changed from single category to array
 });
 
 // Create and export the Mongoose model

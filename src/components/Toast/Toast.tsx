@@ -33,6 +33,7 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose }) => {
   return (
     <div
       className={`flex items-center p-4 rounded-lg shadow-lg ${getBackgroundColor()} text-white`}
+      role="alert"
     >
       <span className="flex-1">{message}</span>
       <button onClick={onClose} className="ml-4 text-lg font-bold">
