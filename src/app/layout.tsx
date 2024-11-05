@@ -2,7 +2,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import I18nProvider from "../components/I18nProvider"; // Import I18nProvider
+import I18nProvider from "../components/I18nProvider";
+import ClientWrapper from "@/components/ClientWrapper";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +30,9 @@ export default function RootLayout({
     <html lang="en" data-theme="light">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <I18nProvider>
-          {children}
+          <ClientWrapper>
+            {children}
+          </ClientWrapper>
         </I18nProvider>
       </body>
     </html>

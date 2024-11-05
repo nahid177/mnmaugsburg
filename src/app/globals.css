@@ -25,3 +25,14 @@
   font-weight: bold;
   width: 208px;
 }
+.offline-alert {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #ffcc00;
+  color: #000;
+  text-align: center;
+  padding: 0.5em;
+  font-weight: bold;
+  z-index: 1000;
+}
