@@ -1,4 +1,6 @@
+// src/components/Login.tsx
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
@@ -30,9 +32,9 @@ const Login: React.FC = () => {
       console.log("Existing deviceId:", storedDeviceId);
     }
 
-    // Check if the user is already logged in
+    // Check if the admin is already logged in
     const token = Cookies.get("token");
-    console.log("Checking token in Login:", token);
+    console.log("Checking token in Admin Login:", token);
 
     if (token) {
       router.push("/admin");
@@ -42,6 +44,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setToast({ type: "", message: "" });
 
     const data = {
       username,
@@ -80,9 +83,9 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center px-4 py-6 lg:py-12 bg-base-100 text-black">
       <div className="flex flex-col md:flex-row-reverse items-center max-w-4xl w-full space-y-6 md:space-y-0 md:space-x-6">
         <div className="text-center md:text-left flex-1 px-6">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4">Login Now!</h1>
+          <h1 className="text-4xl lg:text-5xl font-bold mb-4">Admin Login</h1>
           <p className="text-sm md:text-base lg:text-lg">
-            Welcome back! Please login with your admin credentials. Only two devices are allowed per user account.
+            Welcome back! Please login with your admin credentials. Only two devices are allowed per account.
           </p>
         </div>
 
@@ -146,7 +149,7 @@ const Login: React.FC = () => {
                 <div className="flex items-center w-full p-4 mb-4 text-gray-500 bg-white rounded-lg shadow" role="alert">
                   <div className="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg">
                     <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" />
+                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10l-2.293-2.293a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" />
                     </svg>
                   </div>
                   <div className="ml-3 text-sm font-normal">
@@ -159,7 +162,7 @@ const Login: React.FC = () => {
 
           <div className="text-center mt-4">
             <p className="text-sm">
-              Don&#39;t have an account?{" "}
+              Dont have an account?{" "}
               <Link href="/admin/register" className="text-blue-500 hover:underline">
                 Register here
               </Link>.

@@ -1,3 +1,4 @@
+// models/AdminUser.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 // Interface for Admin User
@@ -10,12 +11,29 @@ interface IAdminUser extends Document {
 }
 
 // Admin User schema
-const AdminUserSchema: Schema = new Schema<IAdminUser>({
-  username: { type: String, required: true, unique: true }, // Username must be unique
-  password: { type: String, required: true }, // Password (hashed)
-  devices: { type: [String], default: [], maxlength: 10 }, // Array of device IDs (max length 10)
-}, { timestamps: true });
+const AdminUserSchema: Schema = new Schema<IAdminUser>(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    }, // Username must be unique
+    password: {
+      type: String,
+      required: true,
+    }, // Password (hashed)
+    devices: {
+      type: [String],
+      default: [],
+      maxlength: 2, // Restrict to 2 devices
+    }, // Array of device IDs (max length 2)
+  },
+  { timestamps: true }
+);
 
 // Create the Admin User model
-const AdminUser = mongoose.models.AdminUser || mongoose.model<IAdminUser>('AdminUser', AdminUserSchema);
+const AdminUser =
+  mongoose.models.AdminUser || mongoose.model<IAdminUser>('AdminUser', AdminUserSchema);
+
 export default AdminUser;

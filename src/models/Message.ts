@@ -2,10 +2,13 @@
 import mongoose, { Schema, model } from "mongoose";
 
 interface IMessage {
-  sender: string;
-  userId: string;
+  _id: mongoose.Types.ObjectId;
+  sender: string; // 'User' or 'Admin'
+  userId: string; // ID of the user
   message: string;
   status: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const MessageSchema = new Schema<IMessage>(
