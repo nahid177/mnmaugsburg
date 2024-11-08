@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react";
 
 interface ChatMessage {
-  id?: string;
+  id: string; // Ensure id is always a string and required
   sender: string;
   userId: string;
   message: string;
@@ -78,14 +78,19 @@ const ChatComponent: React.FC = () => {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
-            ...savedMessage,
+            id: savedMessage.id, // Ensure id is correctly assigned
+            sender: savedMessage.sender,
+            userId: savedMessage.userId,
+            message: savedMessage.message,
+            status: savedMessage.status,
             time: new Date(savedMessage.createdAt).toLocaleString(),
           },
         ]);
         setInput("");
       } else {
         console.error("Failed to send message");
-        setError("Failed to send message. Please try again.");
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to send message. Please try again.");
       }
     } catch (err) {
       console.error("Error sending message:", err);
@@ -100,6 +105,11 @@ const ChatComponent: React.FC = () => {
     fetchMessages();
   }, []);
 
+  // Optional: Log messages to verify
+  useEffect(() => {
+    console.log("Fetched Messages:", messages);
+  }, [messages]);
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-4 bg-base-200 rounded-lg shadow-md mt-16">
       {/* Error Message */}
@@ -113,7 +123,7 @@ const ChatComponent: React.FC = () => {
       <div className="space-y-4 overflow-y-auto max-h-96">
         {messages.map((chat) => (
           <div
-            key={chat.id}
+            key={chat.id} // Ensure chat.id is unique and defined
             className={`flex flex-col ${
               chat.sender === "You" ? "items-end" : "items-start"
             }`}
