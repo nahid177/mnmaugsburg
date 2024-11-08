@@ -21,11 +21,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // User found, return success response
+    // User found, return success response with userId and username
     return NextResponse.json({
       message: 'Login successful',
       user: {
-        id: user.id,
+        id: user._id, // Use _id from MongoDB as userId
         username: user.username,
       },
     }, { status: 200 });

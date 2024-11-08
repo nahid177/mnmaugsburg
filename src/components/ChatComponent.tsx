@@ -1,3 +1,4 @@
+// src/components/ChatComponent.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -19,8 +20,14 @@ const ChatComponent: React.FC = () => {
 
   // Fetch messages from the API
   const fetchMessages = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setError("User not logged in.");
+      return;
+    }
+
     try {
-      const response = await fetch("/api/messages");
+      const response = await fetch(`/api/messages?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
         setMessages(data);
@@ -41,15 +48,20 @@ const ChatComponent: React.FC = () => {
     setError("");
 
     // Retrieve user ID from localStorage
-    const userId = localStorage.getItem("userId") || "unknown";
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setError("User not logged in.");
+      setLoading(false);
+      return;
+    }
+
     const sender = localStorage.getItem("username") || "You";
 
-    const newMessage: ChatMessage = {
+    const newMessage: Omit<ChatMessage, "id" | "time"> = {
       sender,
       userId,
       message: input,
       status: "Sent",
-      time: new Date().toLocaleString(), // Fallback time
     };
 
     try {
@@ -63,7 +75,13 @@ const ChatComponent: React.FC = () => {
 
       if (response.ok) {
         const savedMessage = await response.json();
-        setMessages([...messages, { ...savedMessage, time: new Date(savedMessage.createdAt).toLocaleString() }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            ...savedMessage,
+            time: new Date(savedMessage.createdAt).toLocaleString(),
+          },
+        ]);
         setInput("");
       } else {
         console.error("Failed to send message");
@@ -92,15 +110,21 @@ const ChatComponent: React.FC = () => {
       )}
 
       {/* Chat Messages */}
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-y-auto max-h-96">
         {messages.map((chat) => (
           <div
             key={chat.id}
-            className={`flex flex-col ${chat.sender === "You" ? "items-end" : "items-start"}`}
+            className={`flex flex-col ${
+              chat.sender === "You" ? "items-end" : "items-start"
+            }`}
           >
             <div className="flex items-center space-x-2">
-              <div className="text-sm md:text-base lg:text-lg font-semibold">{chat.sender}</div>
-              <time className="text-xs md:text-sm text-gray-500">{chat.time}</time>
+              <div className="text-sm md:text-base lg:text-lg font-semibold">
+                {chat.sender}
+              </div>
+              <time className="text-xs md:text-sm text-gray-500">
+                {chat.time}
+              </time>
             </div>
             <div
               className={`px-4 py-2 mt-1 rounded-lg shadow-sm text-white break-words max-w-[75%] ${
@@ -109,7 +133,9 @@ const ChatComponent: React.FC = () => {
             >
               {chat.message}
             </div>
-            <div className="text-xs md:text-sm text-gray-500 mt-1">{chat.status}</div>
+            <div className="text-xs md:text-sm text-gray-500 mt-1">
+              {chat.status}
+            </div>
           </div>
         ))}
       </div>

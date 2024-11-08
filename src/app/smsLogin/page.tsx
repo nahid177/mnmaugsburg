@@ -1,3 +1,4 @@
+// src/app/smsLogin/page.tsx
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -6,6 +7,7 @@ import { useRouter } from 'next/navigation';
 const SmsLogin: React.FC = () => {
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
@@ -13,16 +15,19 @@ const SmsLogin: React.FC = () => {
   // Check if the user is already logged in
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUsername && storedUserId) {
       setUsername(storedUsername);
       setIsLoggedIn(true);
       setMessage(`Welcome back, ${storedUsername}!`);
+      setMessageType('success');
     }
   }, []);
 
   const handleLogin = async () => {
     setLoading(true);
     setMessage('');
+    setMessageType('');
 
     try {
       const res = await fetch('/api/login', {
@@ -37,7 +42,10 @@ const SmsLogin: React.FC = () => {
 
       if (res.status === 200) {
         setMessage('Login successful!');
-        localStorage.setItem('username', username);
+        setMessageType('success');
+        // Store both userId and username in localStorage
+        localStorage.setItem('userId', data.user.id);
+        localStorage.setItem('username', data.user.username);
         setIsLoggedIn(true);
 
         // Redirect after a short delay
@@ -46,19 +54,24 @@ const SmsLogin: React.FC = () => {
         }, 1500);
       } else {
         setMessage(data.message || 'Login failed.');
+        setMessageType('error');
       }
-    } catch {
+    } catch (error) {
+      console.error('Login Error:', error);
       setMessage('Login failed due to a network error.');
+      setMessageType('error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('userId');
     localStorage.removeItem('username');
     setUsername('');
     setIsLoggedIn(false);
     setMessage('You have been logged out.');
+    setMessageType('success');
   };
 
   return (
@@ -88,14 +101,14 @@ const SmsLogin: React.FC = () => {
               <button
                 onClick={handleLogin}
                 className={`btn btn-primary w-full mt-4 ${loading ? 'loading' : ''}`}
-                disabled={loading || !username}
+                disabled={loading || !username.trim()}
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
             </>
           )}
           {message && (
-            <div className="alert alert-info mt-4">
+            <div className={`alert ${messageType === 'success' ? 'alert-success' : 'alert-error'} mt-4`}>
               <span>{message}</span>
             </div>
           )}
