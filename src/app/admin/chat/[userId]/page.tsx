@@ -5,6 +5,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Cookies from 'js-cookie';
+import AdminLayout from '../../AdminLayout';
 
 // Define the structure of a single chat message
 interface ChatMessage {
@@ -145,7 +146,8 @@ const AdminChat: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
+    <AdminLayout>
+        <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6 space-y-6">
         {/* Header */}
         <h1 className="text-2xl font-semibold text-gray-800">
@@ -231,6 +233,8 @@ const AdminChat: React.FC = () => {
         )}
       </div>
     </div>
+    </AdminLayout>
+  
   );
 };
 
