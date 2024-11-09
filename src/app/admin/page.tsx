@@ -1,11 +1,12 @@
 // src/app/admin/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import useSWR from "swr";
 import AdminLayout from "./AdminLayout";
-import StatsCard from "@/components/StatsCard"; // Ensure this path is correct
+import StatsCard from "@/components/StatsCard";
 import Link from "next/link";
 
 interface User {
@@ -15,90 +16,47 @@ interface User {
   updatedAt: string;
 }
 
+// Fetcher function for SWR
+const fetcher = (url: string, token: string | null) => {
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  return fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => {
+    if (!res.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    return res.json();
+  });
+};
+
 const AdminDashboard: React.FC = () => {
   const router = useRouter();
-  
-  // Statistics State
-  const [registerCount, setRegisterCount] = useState<number>(0);
-  const [loginCount, setLoginCount] = useState<number>(0);
-  const [statsLoading, setStatsLoading] = useState<boolean>(true);
-  const [statsError, setStatsError] = useState<string>('');
+  const token = Cookies.get("token") || null;
 
-  // Users State
-  const [users, setUsers] = useState<User[]>([]);
-  const [usersLoading, setUsersLoading] = useState<boolean>(true);
-  const [usersError, setUsersError] = useState<string>('');
+  // Use SWR for statistics data with a 1-second refresh interval
+  const { data: statsData, error: statsError } = useSWR(
+    token ? ["/api/admin/stats", token] : null,
+    ([url, token]) => fetcher(url, token),
+    { refreshInterval: 1000, dedupingInterval: 1000 }
+  );
 
-  useEffect(() => {
-    const token = Cookies.get("token");
+  // Use SWR for users data with a 1-second refresh interval
+  const { data: usersData, error: usersError } = useSWR(
+    token ? ["/api/admin/users", token] : null,
+    ([url, token]) => fetcher(url, token),
+    { refreshInterval: 1000, dedupingInterval: 1000 }
+  );
 
-    if (!token) {
-      router.push("/admin/login");
-      return;
-    }
-
-    // Fetch Statistics
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("/api/admin/stats", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-          setRegisterCount(data.totalRegistrations || 0);
-          setLoginCount(data.totalLogins || 0);
-        } else {
-          setStatsError(data.message || "Failed to fetch statistics.");
-        }
-      } catch (error) {
-        console.error("Error fetching statistics:", error);
-        setStatsError("Network error. Please try again.");
-      } finally {
-        setStatsLoading(false);
-      }
-    };
-
-    // Fetch Users
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch('/api/admin/users', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setUsers(data.users);
-        } else if (res.status === 401 || res.status === 403) {
-          router.push('/admin/login');
-        } else {
-          const data = await res.json();
-          setUsersError(data.message || 'Failed to fetch users.');
-        }
-      } catch (err) {
-        console.error('Error fetching users:', err);
-        setUsersError('Network error. Please try again.');
-      } finally {
-        setUsersLoading(false);
-      }
-    };
-
-    fetchStats();
-    fetchUsers();
-
-    // Optionally, set intervals to refresh data periodically
-    const statsInterval = setInterval(fetchStats, 900000); // Every 15 minutes
-    const usersInterval = setInterval(fetchUsers, 900000); // Every 15 minutes
-
-    return () => {
-      clearInterval(statsInterval);
-      clearInterval(usersInterval);
-    };
-  }, [router]);
+  // Redirect to login if there's an authentication error
+  if (statsError?.message === "Unauthorized" || usersError?.message === "Unauthorized") {
+    router.push("/admin/login");
+    return null;
+  }
 
   return (
     <AdminLayout>
@@ -109,16 +67,16 @@ const AdminDashboard: React.FC = () => {
 
         {/* Statistics Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-4xl px-4">
-          {statsLoading ? (
+          {!statsData ? (
             <p>Loading statistics...</p>
           ) : statsError ? (
             <div className="alert alert-error">
-              <span>{statsError}</span>
+              <span>{statsError.message || "Failed to fetch statistics."}</span>
             </div>
           ) : (
             <>
-              <StatsCard title="Total Registrations" count={registerCount} />
-              <StatsCard title="Total Logins" count={loginCount} />
+              <StatsCard title="Total Registrations" count={statsData.totalRegistrations || 0} />
+              <StatsCard title="Total Logins" count={statsData.totalLogins || 0} />
             </>
           )}
         </div>
@@ -130,11 +88,11 @@ const AdminDashboard: React.FC = () => {
         <div className="w-full max-w-4xl px-4">
           <h2 className="text-2xl font-semibold mb-4">User Management</h2>
 
-          {usersLoading ? (
+          {!usersData ? (
             <p>Loading users...</p>
           ) : usersError ? (
             <div className="alert alert-error">
-              <span>{usersError}</span>
+              <span>{usersError.message || "Failed to fetch users."}</span>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -147,7 +105,7 @@ const AdminDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {usersData.users.map((user: User) => (
                     <tr key={user._id}>
                       <td>{user.username}</td>
                       <td>{new Date(user.createdAt).toLocaleString()}</td>
