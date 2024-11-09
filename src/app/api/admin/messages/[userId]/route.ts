@@ -26,7 +26,7 @@ export async function GET(req: Request, context: { params: { userId: string } })
 
     // Format messages
     const formattedMessages = messages.map((msg) => ({
-      id: msg._id.toString(),
+      id: msg._id!.toString(),
       sender: msg.sender,
       userId: msg.userId,
       message: msg.message,

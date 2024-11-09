@@ -1,7 +1,7 @@
 // src/components/ChatComponent.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface ChatMessage {
   id: string; // Ensure id is always a string and required
@@ -17,6 +17,13 @@ const ChatComponent: React.FC = () => {
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Function to scroll to the latest message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Fetch messages from the API
   const fetchMessages = async () => {
@@ -87,6 +94,7 @@ const ChatComponent: React.FC = () => {
           },
         ]);
         setInput("");
+        scrollToBottom();
       } else {
         console.error("Failed to send message");
         const errorData = await response.json();
@@ -103,65 +111,90 @@ const ChatComponent: React.FC = () => {
   // Fetch messages on component load
   useEffect(() => {
     fetchMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Optional: Log messages to verify
+  // Scroll to the latest message whenever messages change
   useEffect(() => {
-    console.log("Fetched Messages:", messages);
+    scrollToBottom();
   }, [messages]);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-4 bg-base-200 rounded-lg shadow-md mt-16">
+    <div className="max-w-4xl mx-auto p-6 space-y-6 bg-white rounded-lg shadow-md mt-16">
       {/* Error Message */}
       {error && (
-        <div className="alert alert-error">
-          <span>{error}</span>
+        <div className="p-4 bg-red-100 text-red-700 rounded-md">
+          {error}
         </div>
       )}
 
+      {/* Chat Header */}
+      <div className="text-2xl font-semibold text-gray-800">
+        Chat Support
+      </div>
+
       {/* Chat Messages */}
-      <div className="space-y-4 overflow-y-auto max-h-96">
-        {messages.map((chat) => (
-          <div
-            key={chat.id} // Ensure chat.id is unique and defined
-            className={`flex flex-col ${
-              chat.sender === "You" ? "items-end" : "items-start"
-            }`}
-          >
-            <div className="flex items-center space-x-2">
-              <div className="text-sm md:text-base lg:text-lg font-semibold">
-                {chat.sender}
-              </div>
-              <time className="text-xs md:text-sm text-gray-500">
-                {chat.time}
-              </time>
-            </div>
-            <div
-              className={`px-4 py-2 mt-1 rounded-lg shadow-sm text-white break-words max-w-[75%] ${
-                chat.sender === "You" ? "bg-green-500" : "bg-blue-500"
-              } text-sm md:text-base lg:text-lg`}
-            >
-              {chat.message}
-            </div>
-            <div className="text-xs md:text-sm text-gray-500 mt-1">
-              {chat.status}
-            </div>
+      <div className="flex flex-col space-y-4 overflow-y-auto max-h-96 px-4">
+        {messages.length === 0 && !error && (
+          <div className="text-center text-gray-500">
+            No messages yet. Start the conversation!
           </div>
-        ))}
+        )}
+        {messages.map((chat) => {
+          const isUser = chat.sender === (localStorage.getItem("username") || "You");
+          return (
+            <div
+              key={chat.id} // Ensure chat.id is unique and defined
+              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+            >
+              <div className="flex flex-col space-y-1 max-w-xs">
+                {/* Sender and Time */}
+                <div className={`flex items-center space-x-2 ${isUser ? "flex-row-reverse" : ""}`}>
+                  <div className="text-sm font-medium text-gray-700">
+                    {chat.sender}
+                  </div>
+                  <time className="text-xs text-gray-400">
+                    {chat.time}
+                  </time>
+                </div>
+                {/* Message Bubble */}
+                <div
+                  className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${
+                    isUser ? "bg-green-500 self-end" : "bg-blue-500 self-start"
+                  }`}
+                >
+                  {chat.message}
+                </div>
+                {/* Status */}
+                <div className={`text-xs text-gray-500 ${isUser ? "text-right" : "text-left"}`}>
+                  {chat.status}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Box and Button */}
-      <div className="flex items-center space-x-2 mt-4">
+      <div className="flex items-center space-x-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 input input-bordered focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !loading && input.trim() !== "") {
+              handleSendMessage();
+            }
+          }}
         />
         <button
           onClick={handleSendMessage}
-          className={`btn btn-primary ${loading ? "loading" : ""}`}
+          className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           disabled={loading || !input.trim()}
         >
           {loading ? "Sending..." : "Send"}
