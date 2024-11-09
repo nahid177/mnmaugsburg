@@ -160,7 +160,7 @@ const ChatComponent: React.FC = () => {
                 {/* Message Bubble */}
                 <div
                   className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${
-                    isUser ? "bg-green-500 self-end" : "bg-blue-500 self-start"
+                    isUser ? "bg-green-500 " : "bg-blue-500 "
                   }`}
                 >
                   {chat.message}
