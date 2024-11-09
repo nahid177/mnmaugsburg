@@ -4,10 +4,11 @@ import dbConnect from '@/lib/dbConnect';
 import Message from '@/models/Message';
 import { verifyToken } from '@/lib/auth';
 
-export async function GET(req: Request, { params }: { params: { userId: string } }) {
+export async function GET(req: Request, context: { params: { userId: string } }) {
   await dbConnect();
 
-  const { userId } = params;
+  // Await the params object
+  const { userId } = await context.params;
 
   try {
     const token = req.headers.get('Authorization')?.split(' ')[1];
