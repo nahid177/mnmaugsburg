@@ -1,19 +1,12 @@
 // src/app/admin/chat/[userId]/page.tsx
+
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Cookies from 'js-cookie';
 
-interface ApiChatMessage {
-  id: string;
-  sender: string;
-  userId: string;
-  message: string;
-  status: string;
-  createdAt: string;
-}
-
+// Define the structure of a single chat message
 interface ChatMessage {
   id: string;
   sender: string;
@@ -23,11 +16,18 @@ interface ChatMessage {
   time: string;
 }
 
+// Define the structure of the API response
+interface ApiGetMessagesResponse {
+  messages: ChatMessage[];
+  username: string;
+}
+
 const AdminChat: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const { userId } = params;
 
+  const [username, setUsername] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -58,18 +58,13 @@ const AdminChat: React.FC = () => {
         });
 
         if (res.ok) {
-          const data = await res.json();
-          const formattedMessages: ChatMessage[] = data.messages.map((msg: ApiChatMessage) => ({
-            id: msg.id,
-            sender: msg.sender,
-            userId: msg.userId,
-            message: msg.message,
-            status: msg.status,
-            time: new Date(msg.createdAt).toLocaleString(),
-          }));
-          setMessages(formattedMessages);
+          const data: ApiGetMessagesResponse = await res.json();
+          setMessages(data.messages);
+          setUsername(data.username);
         } else if (res.status === 401 || res.status === 403) {
           router.push('/login');
+        } else if (res.status === 404) {
+          setError('User not found.');
         } else {
           const data = await res.json();
           setError(data.message || 'Failed to fetch messages.');
@@ -153,7 +148,9 @@ const AdminChat: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
       <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6 space-y-6">
         {/* Header */}
-        <h1 className="text-2xl font-semibold text-gray-800">Chat with User: {userId}</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Chat with User: {username || userId}
+        </h1>
 
         {/* Error Message */}
         {error && (

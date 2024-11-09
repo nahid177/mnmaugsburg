@@ -1,4 +1,5 @@
-// models/User.ts
+// src/models/User.ts
+
 import mongoose, { Schema, model } from 'mongoose';
 import { IUser } from '../interfaces/IUser';
 
@@ -10,6 +11,7 @@ const UserSchema: Schema<IUser> = new Schema<IUser>(
       unique: true,
       trim: true,
     },
+    // Add other fields as necessary
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields automatically

@@ -1,4 +1,5 @@
-// interfaces/IUser.ts
+// src/interfaces/IUser.ts
+
 import { Document } from 'mongoose';
 
 export interface IUser extends Document {
