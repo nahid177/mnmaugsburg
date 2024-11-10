@@ -15,15 +15,23 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Missing userId" }, { status: 400 });
     }
 
-    // Fetch messages for the specific user, sorted by creation time
-    const messages = await Message.find({ userId }).sort({ createdAt: 1 });
-    const formattedMessages = messages.map((msg) => ({
-      id: msg._id.toString(), // Convert ObjectId to string
-      sender: msg.sender,
+    // Update status from 'sent' to 'seen' for user messages
+    await Message.updateMany(
+      { userId, status: "sent" },
+      { $set: { status: "seen" } }
+    );
+
+    // Fetch updated messages for the specific user, sorted by creation time
+    const updatedMessages = await Message.find({ userId }).sort({ createdAt: 1 });
+
+    const formattedMessages = updatedMessages.map((msg) => ({
+      id: msg._id.toString(),
+      sender: msg.sender, // 'User' or 'Admin'
+      senderName: msg.senderName, // Optional: Actual name
       userId: msg.userId,
       message: msg.message,
       status: msg.status,
-      time: msg.createdAt.toLocaleString(), // Format the createdAt timestamp
+      time: msg.createdAt.toLocaleString(),
     }));
 
     return NextResponse.json(formattedMessages, { status: 200 });
@@ -38,23 +46,34 @@ export async function POST(req: Request) {
   await dbConnect();
 
   try {
-    const { sender, userId, message, status } = await req.json();
+    const { sender, senderName, userId, message, status } = await req.json();
 
     // Validate the input data
-    if (!sender || !userId || !message || !status) {
+    if (!sender || !userId || !message) {
       return NextResponse.json({ message: "Invalid data" }, { status: 400 });
     }
 
-    // Create a new message
-    const newMessage = await Message.create({ sender, userId, message, status });
-    return NextResponse.json({
-      id: newMessage._id.toString(), // Ensure the frontend receives a string id
-      sender: newMessage.sender,
-      userId: newMessage.userId,
-      message: newMessage.message,
-      status: newMessage.status,
-      createdAt: newMessage.createdAt, // Send createdAt for frontend formatting
-    }, { status: 201 });
+    // Create a new message with status 'sent' by default if not provided
+    const newMessage = await Message.create({
+      sender,
+      senderName, // Optional
+      userId,
+      message,
+      status: status || "sent",
+    });
+
+    return NextResponse.json(
+      {
+        id: newMessage._id.toString(),
+        sender: newMessage.sender,
+        senderName: newMessage.senderName, // Optional
+        userId: newMessage.userId,
+        message: newMessage.message,
+        status: newMessage.status,
+        createdAt: newMessage.createdAt, // For frontend formatting
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error saving message:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

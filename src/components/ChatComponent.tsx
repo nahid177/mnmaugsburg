@@ -1,4 +1,5 @@
 // src/components/ChatComponent.tsx
+
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -6,15 +7,31 @@ import useSWR, { mutate } from "swr";
 
 interface ChatMessage {
   id: string; // Ensure id is always a string and required
-  sender: string;
+  sender: "User" | "Admin"; // Updated to reflect the enum
+  senderName?: string; // Optional: Actual name of the sender
   userId: string;
   message: string;
-  status: string;
+  status: "sent" | "seen"; // Updated to reflect the enum
   time: string;
 }
 
-// Define the fetcher function
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+// Define the fetcher function with authorization
+const fetcher = (url: string, token: string) => {
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  return fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => {
+    if (!res.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    return res.json();
+  });
+};
 
 const ChatComponent: React.FC = () => {
   const [input, setInput] = useState<string>("");
@@ -24,13 +41,19 @@ const ChatComponent: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Retrieve user information from localStorage
-  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-  const username = typeof window !== "undefined" ? localStorage.getItem("username") || "You" : "You";
+  const userId =
+    typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const username =
+    typeof window !== "undefined"
+      ? localStorage.getItem("username") || "You"
+      : "You";
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   // Use SWR to fetch messages with a revalidation interval of 1 second
   const { data: messages, error: fetchError } = useSWR<ChatMessage[]>(
-    userId ? `/api/messages?userId=${userId}` : null,
-    fetcher,
+    userId && token ? [`/api/messages?userId=${userId}`, token] : null,
+    ([url, token]: [string, string]) => fetcher(url, token),
     {
       refreshInterval: 1000, // Revalidate every 1 second
       dedupingInterval: 1000, // Deduplicate requests within 1 second
@@ -48,7 +71,9 @@ const ChatComponent: React.FC = () => {
 
   // Scroll to bottom whenever messages change
   React.useEffect(() => {
-    scrollToBottom();
+    if (messages) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   // Send a new message to the API
@@ -57,17 +82,18 @@ const ChatComponent: React.FC = () => {
     setLoading(true);
     setError("");
 
-    if (!userId) {
+    if (!userId || !token) {
       setError("User not logged in.");
       setLoading(false);
       return;
     }
 
     const newMessage: Omit<ChatMessage, "id" | "time"> = {
-      sender: username,
+      sender: "User", // Set to 'User' to comply with the enum
+      senderName: username, // Optional: Include the actual username
       userId,
       message: input,
-      status: "Sent",
+      status: "sent", // Added status field
     };
 
     try {
@@ -75,6 +101,7 @@ const ChatComponent: React.FC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(newMessage),
       });
@@ -84,12 +111,13 @@ const ChatComponent: React.FC = () => {
 
         // Optimistically update the messages cache
         mutate(
-          `/api/messages?userId=${userId}`,
+          [`/api/messages?userId=${userId}`, token],
           (currentData: ChatMessage[] = []) => [
             ...currentData,
             {
               id: savedMessage.id, // Ensure id is correctly assigned
-              sender: savedMessage.sender,
+              sender: savedMessage.sender, // Will be 'User' or 'Admin'
+              senderName: savedMessage.senderName, // Actual username if provided
               userId: savedMessage.userId,
               message: savedMessage.message,
               status: savedMessage.status,
@@ -104,7 +132,9 @@ const ChatComponent: React.FC = () => {
       } else {
         console.error("Failed to send message");
         const errorData = await response.json();
-        setError(errorData.message || "Failed to send message. Please try again.");
+        setError(
+          errorData.message || "Failed to send message. Please try again."
+        );
       }
     } catch (err) {
       console.error("Error sending message:", err);
@@ -147,7 +177,7 @@ const ChatComponent: React.FC = () => {
         )}
         {messages &&
           messages.map((chat) => {
-            const isUser = chat.sender === username;
+            const isUser = chat.sender === "User";
             return (
               <div
                 key={chat.id} // Ensure chat.id is unique and defined
@@ -155,9 +185,13 @@ const ChatComponent: React.FC = () => {
               >
                 <div className="flex flex-col space-y-1 max-w-xs">
                   {/* Sender and Time */}
-                  <div className={`flex items-center space-x-2 ${isUser ? "flex-row-reverse" : ""}`}>
+                  <div
+                    className={`flex items-center space-x-2 ${
+                      isUser ? "flex-row-reverse" : ""
+                    }`}
+                  >
                     <div className="text-sm font-medium text-gray-700">
-                      {chat.sender}
+                      {isUser ? "You" : "Admin"}
                     </div>
                     <time className="text-xs text-gray-400">
                       {chat.time}
@@ -172,8 +206,12 @@ const ChatComponent: React.FC = () => {
                     {chat.message}
                   </div>
                   {/* Status */}
-                  <div className={`text-xs text-gray-500 ${isUser ? "text-right" : "text-left"}`}>
-                    {chat.status}
+                  <div
+                    className={`text-xs text-gray-500 ${
+                      isUser ? "text-right" : "text-left"
+                    }`}
+                  >
+                    {chat.status === "sent" ? "Sent" : "Seen"}
                   </div>
                 </div>
               </div>

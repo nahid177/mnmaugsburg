@@ -18,19 +18,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid token' }, { status: 403 });
     }
 
-    const { userId, message, status } = await req.json();
+    const { userId, message } = await req.json();
 
     // Validate input
-    if (!userId || !message || !status) {
+    if (!userId || !message) { // Removed 'status' from validation since it's set automatically
       return NextResponse.json({ message: 'Invalid data' }, { status: 400 });
     }
 
-    // Create a new message from admin
+    // Create a new message from admin with status 'sent'
     const newMessage = await Message.create({
       sender: 'Admin', // Indicate that the sender is admin
       userId,
       message,
-      status,
+      status: 'sent', // Set status to 'sent' by default
     });
 
     return NextResponse.json({

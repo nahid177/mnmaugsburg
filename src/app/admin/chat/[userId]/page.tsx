@@ -13,7 +13,7 @@ interface ChatMessage {
   sender: string;
   userId: string;
   message: string;
-  status: string;
+  status: "sent" | "seen"; // Updated to reflect the enum
   time: string;
 }
 
@@ -22,7 +22,7 @@ interface ApiGetMessagesResponse {
   username: string;
 }
 
-// Fetcher function for SWR
+// Fetcher function for SWR with authorization
 const fetcher = (url: string, token: string) => {
   if (!token) {
     throw new Error("Unauthorized");
@@ -88,7 +88,7 @@ const AdminChat: React.FC = () => {
     const messageData = {
       userId,
       message: input,
-      status: "Sent",
+      // status is set to 'sent' by default in the backend
     };
 
     try {
@@ -146,23 +146,40 @@ const AdminChat: React.FC = () => {
           )}
 
           {/* Loading Indicator */}
-          {!data && !fetchError && <p className="text-center text-gray-500">Loading messages...</p>}
+          {!data && !fetchError && (
+            <p className="text-center text-gray-500">Loading messages...</p>
+          )}
 
           {/* Chat Messages */}
           {data?.messages && (
             <div className="flex flex-col space-y-4 overflow-y-auto max-h-[60vh] px-4">
               {data.messages.length === 0 ? (
-                <div className="text-center text-gray-500">No messages yet. Start the conversation!</div>
+                <div className="text-center text-gray-500">
+                  No messages yet. Start the conversation!
+                </div>
               ) : (
                 data.messages.map((msg) => {
                   const isAdmin = msg.sender === "Admin";
                   return (
-                    <div key={msg.id} className={`flex ${isAdmin ? "justify-start" : "justify-end"}`}>
+                    <div
+                      key={msg.id}
+                      className={`flex ${
+                        isAdmin ? "justify-start" : "justify-end"
+                      }`}
+                    >
                       <div className="flex flex-col space-y-1 max-w-xs">
                         {/* Sender and Time */}
-                        <div className={`flex items-center space-x-2 ${isAdmin ? "" : "flex-row-reverse"}`}>
-                          <div className="text-sm font-medium text-gray-700">{msg.sender}</div>
-                          <time className="text-xs text-gray-400">{msg.time}</time>
+                        <div
+                          className={`flex items-center space-x-2 ${
+                            isAdmin ? "" : "flex-row-reverse"
+                          }`}
+                        >
+                          <div className="text-sm font-medium text-gray-700">
+                            {msg.sender}
+                          </div>
+                          <time className="text-xs text-gray-400">
+                            {msg.time}
+                          </time>
                         </div>
                         {/* Message Bubble */}
                         <div
@@ -173,8 +190,12 @@ const AdminChat: React.FC = () => {
                           {msg.message}
                         </div>
                         {/* Status */}
-                        <div className={`text-xs text-gray-500 ${isAdmin ? "text-left" : "text-right"}`}>
-                          {msg.status}
+                        <div
+                          className={`text-xs text-gray-500 ${
+                            isAdmin ? "text-left" : "text-right"
+                          }`}
+                        >
+                          {msg.status === "sent" ? "Sent" : "Seen"}
                         </div>
                       </div>
                     </div>

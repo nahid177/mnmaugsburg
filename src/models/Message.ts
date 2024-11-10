@@ -1,12 +1,14 @@
 // models/Message.ts
-import mongoose, { Schema, model } from "mongoose";
+
+import mongoose, { Schema, model, models } from "mongoose";
 
 interface IMessage {
   _id: mongoose.Types.ObjectId;
-  sender: string; // 'User' or 'Admin'
+  sender: "User" | "Admin"; // Role of the sender
+  senderName?: string; // Optional: Actual name of the sender
   userId: string; // ID of the user
   message: string;
-  status: string;
+  status: "sent" | "seen"; // Status of the message
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +18,11 @@ const MessageSchema = new Schema<IMessage>(
     sender: {
       type: String,
       required: true,
+      enum: ["User", "Admin"], // Restricts to 'User' or 'Admin'
+    },
+    senderName: {
+      type: String,
+      required: false, // Optional: Set to true if always required
     },
     userId: {
       type: String,
@@ -28,6 +35,8 @@ const MessageSchema = new Schema<IMessage>(
     status: {
       type: String,
       required: true,
+      enum: ["sent", "seen"], // Restricts to 'sent' or 'seen'
+      default: "sent",
     },
   },
   {
@@ -35,4 +44,4 @@ const MessageSchema = new Schema<IMessage>(
   }
 );
 
-export default mongoose.models.Message || model<IMessage>("Message", MessageSchema);
+export default models.Message || model<IMessage>("Message", MessageSchema);
