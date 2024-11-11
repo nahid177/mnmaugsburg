@@ -11,10 +11,10 @@ export enum Sender {
   
   export interface ChatMessage {
     id: string;
-    sender: Sender;
+    sender: 'Admin' | 'User';
     userId: string;
     message: string;
-    status: Status;
+    status: 'sent' | 'seen';
     time: string;
   }
-  
+ 

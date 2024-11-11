@@ -8,7 +8,7 @@ import { verifyToken } from '@/lib/auth';
 
 // Define the structure of a single chat message
 interface ChatMessage {
-  id: string;
+  id: string; // Corrected from 'string' to string
   sender: 'Admin' | 'User';
   userId: string;
   message: string;
@@ -34,7 +34,9 @@ export async function GET(
 ) {
   await dbConnect();
 
-  const { userId } = context.params; // Removed unnecessary 'await'
+  // **Fixed:** Await context.params before destructuring
+  const params = await context.params;
+  const { userId } = params;
 
   try {
     // Extract and verify the token
@@ -68,7 +70,7 @@ export async function GET(
     const formattedMessages: ChatMessage[] = messages.map((msg) => ({
       id: msg._id!.toString(),
       sender: msg.sender as 'Admin' | 'User', // Ensure correct typing
-      userId: msg.userId,
+      userId: msg.userId.toString(), // Ensure userId is string
       message: msg.message,
       status: msg.status as 'sent' | 'seen',
       time: msg.createdAt.toLocaleString(),
