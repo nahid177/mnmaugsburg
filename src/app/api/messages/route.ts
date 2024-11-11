@@ -15,9 +15,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Missing userId" }, { status: 400 });
     }
 
-    // Update status from 'sent' to 'seen' for user messages
+    // **Modified:** Update status only for admin-sent messages
     await Message.updateMany(
-      { userId, status: "sent" },
+      { userId, sender: 'Admin', status: "sent" },
       { $set: { status: "seen" } }
     );
 
@@ -40,7 +40,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
-
 // Handler for saving a new message
 export async function POST(req: Request) {
   await dbConnect();

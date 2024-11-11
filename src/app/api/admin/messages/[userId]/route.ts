@@ -1,3 +1,5 @@
+// src/app/api/admin/messages/[userId]/route.ts
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Message from '@/models/Message';
@@ -7,10 +9,10 @@ import { verifyToken } from '@/lib/auth';
 // Define the structure of a single chat message
 interface ChatMessage {
   id: string;
-  sender: string;
+  sender: 'Admin' | 'User';
   userId: string;
   message: string;
-  status: string;
+  status: 'sent' | 'seen';
   time: string;
 }
 
@@ -23,6 +25,7 @@ interface ApiGetMessagesResponse {
 // Define a separate interface for lean user objects
 interface IUserLean {
   username: string;
+  // Add other necessary fields if required
 }
 
 export async function GET(
@@ -31,8 +34,7 @@ export async function GET(
 ) {
   await dbConnect();
 
-  // Await context.params before destructuring
-  const { userId } = await context.params;
+  const { userId } = context.params; // Removed unnecessary 'await'
 
   try {
     // Extract and verify the token
@@ -53,16 +55,22 @@ export async function GET(
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
+    // **New Addition:** Mark user-sent messages as 'seen'
+    await Message.updateMany(
+      { userId, sender: 'User', status: 'sent' },
+      { $set: { status: 'seen' } }
+    );
+
     // Fetch messages for the specified user
     const messages = await Message.find({ userId }).sort({ createdAt: 1 }).lean();
 
     // Format messages
     const formattedMessages: ChatMessage[] = messages.map((msg) => ({
       id: msg._id!.toString(),
-      sender: msg.sender,
+      sender: msg.sender as 'Admin' | 'User', // Ensure correct typing
       userId: msg.userId,
       message: msg.message,
-      status: msg.status,
+      status: msg.status as 'sent' | 'seen',
       time: msg.createdAt.toLocaleString(),
     }));
 
