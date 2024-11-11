@@ -1,4 +1,5 @@
 // src/app/admin/page.tsx
+
 "use client";
 
 import React from "react";
@@ -16,7 +17,12 @@ interface User {
   updatedAt: string;
 }
 
-// Fetcher function for SWR
+interface ApiAdminStatsResponse {
+  totalRegistrations: number;
+  totalLogins: number;
+  userSentMessagesNotSeen: number;
+}
+
 const fetcher = (url: string, token: string | null) => {
   if (!token) {
     throw new Error("Unauthorized");
@@ -34,26 +40,30 @@ const fetcher = (url: string, token: string | null) => {
   });
 };
 
+
+
 const AdminDashboard: React.FC = () => {
   const router = useRouter();
   const token = Cookies.get("token") || null;
 
-  // Use SWR for statistics data with a 1-second refresh interval
-  const { data: statsData, error: statsError } = useSWR(
+  const { data: statsData, error: statsError } = useSWR<ApiAdminStatsResponse>(
     token ? ["/api/admin/stats", token] : null,
-    ([url, token]) => fetcher(url, token),
+    ([url, token]: [string, string | null]) => fetcher(url, token),
     { refreshInterval: 1000, dedupingInterval: 1000 }
   );
-
-  // Use SWR for users data with a 1-second refresh interval
+  
   const { data: usersData, error: usersError } = useSWR(
     token ? ["/api/admin/users", token] : null,
-    ([url, token]) => fetcher(url, token),
+    ([url, token]: [string, string | null]) => fetcher(url, token),
     { refreshInterval: 1000, dedupingInterval: 1000 }
   );
+  
 
   // Redirect to login if there's an authentication error
-  if (statsError?.message === "Unauthorized" || usersError?.message === "Unauthorized") {
+  if (
+    statsError?.message === "Unauthorized" ||
+    usersError?.message === "Unauthorized"
+  ) {
     router.push("/admin/login");
     return null;
   }
@@ -66,7 +76,7 @@ const AdminDashboard: React.FC = () => {
         </h1>
 
         {/* Statistics Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-4xl px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-4xl px-4">
           {!statsData ? (
             <p>Loading statistics...</p>
           ) : statsError ? (
@@ -75,8 +85,15 @@ const AdminDashboard: React.FC = () => {
             </div>
           ) : (
             <>
-              <StatsCard title="Total Registrations" count={statsData.totalRegistrations || 0} />
+              <StatsCard
+                title="Total Registrations"
+                count={statsData.totalRegistrations || 0}
+              />
               <StatsCard title="Total Logins" count={statsData.totalLogins || 0} />
+              <StatsCard
+                title="Unseen Messages"
+                count={statsData.userSentMessagesNotSeen || 0}
+              />
             </>
           )}
         </div>
@@ -110,7 +127,10 @@ const AdminDashboard: React.FC = () => {
                       <td>{user.username}</td>
                       <td>{new Date(user.createdAt).toLocaleString()}</td>
                       <td>
-                        <Link href={`/admin/chat/${user._id}`} className="btn btn-primary btn-sm">
+                        <Link
+                          href={`/admin/chat/${user._id}`}
+                          className="btn btn-primary btn-sm"
+                        >
                           Chat
                         </Link>
                       </td>
