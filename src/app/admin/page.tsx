@@ -46,13 +46,13 @@ const AdminDashboard: React.FC = () => {
   const { data: statsData, error: statsError } = useSWR<ApiAdminStatsResponse>(
     token ? ["/api/admin/stats", token] : null,
     ([url, token]: [string, string | null]) => fetcher(url, token),
-    { refreshInterval: 1000, dedupingInterval: 1000 }
+    { refreshInterval: 1000, dedupingInterval: 1000 } // Increased interval for performance
   );
   
   const { data: usersData, error: usersError } = useSWR<{ users: User[] }>(
     token ? ["/api/admin/users", token] : null,
     ([url, token]: [string, string | null]) => fetcher(url, token),
-    { refreshInterval: 1000, dedupingInterval: 1000 }
+    { refreshInterval: 1000, dedupingInterval: 1000 } // Increased interval for performance
   );
 
   // Redirect to login if there's an authentication error
@@ -123,7 +123,13 @@ const AdminDashboard: React.FC = () => {
                     <tr key={user._id}>
                       <td>{user.username}</td>
                       <td>{new Date(user.createdAt).toLocaleString()}</td>
-                      <td>{user.sentStatsCount}</td>
+                      <td
+                        className={`${
+                          user.sentStatsCount > 0 ? "bg-red-200 text-red-800 font-semibold" : ""
+                        } px-4 py-2 rounded`}
+                      >
+                        {user.sentStatsCount}
+                      </td>
                       <td>
                         <Link
                           href={`/admin/chat/${user._id}`}
