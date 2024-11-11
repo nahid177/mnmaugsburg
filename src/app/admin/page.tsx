@@ -1,5 +1,3 @@
-// src/app/admin/page.tsx
-
 "use client";
 
 import React from "react";
@@ -15,6 +13,7 @@ interface User {
   username: string;
   createdAt: string;
   updatedAt: string;
+  sentStatsCount: number;
 }
 
 interface ApiAdminStatsResponse {
@@ -40,8 +39,6 @@ const fetcher = (url: string, token: string | null) => {
   });
 };
 
-
-
 const AdminDashboard: React.FC = () => {
   const router = useRouter();
   const token = Cookies.get("token") || null;
@@ -52,12 +49,11 @@ const AdminDashboard: React.FC = () => {
     { refreshInterval: 1000, dedupingInterval: 1000 }
   );
   
-  const { data: usersData, error: usersError } = useSWR(
+  const { data: usersData, error: usersError } = useSWR<{ users: User[] }>(
     token ? ["/api/admin/users", token] : null,
     ([url, token]: [string, string | null]) => fetcher(url, token),
     { refreshInterval: 1000, dedupingInterval: 1000 }
   );
-  
 
   // Redirect to login if there's an authentication error
   if (
@@ -118,6 +114,7 @@ const AdminDashboard: React.FC = () => {
                   <tr>
                     <th>Username</th>
                     <th>Registered At</th>
+                    <th>Sent Stats Count</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -126,6 +123,7 @@ const AdminDashboard: React.FC = () => {
                     <tr key={user._id}>
                       <td>{user.username}</td>
                       <td>{new Date(user.createdAt).toLocaleString()}</td>
+                      <td>{user.sentStatsCount}</td>
                       <td>
                         <Link
                           href={`/admin/chat/${user._id}`}
