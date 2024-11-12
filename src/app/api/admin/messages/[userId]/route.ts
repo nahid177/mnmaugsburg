@@ -35,8 +35,8 @@ export async function GET(
 ) {
   await dbConnect();
 
-  // Correctly await the access to params.userId
-  const userId = await params.userId;
+  // Correctly await the entire params object before accessing userId
+  const { userId } = await params;
 
   try {
     // Extract and verify the token

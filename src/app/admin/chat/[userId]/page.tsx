@@ -3,16 +3,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Cookies from "js-cookie";
-import useSWR, { mutate } from "swr"; // Ensure 'mutate' is used
+import useSWR, { mutate } from "swr";
 import AdminLayout from "../../AdminLayout";
-import Image from "next/image"; // Import the Image component
+import Image from "next/image";
 
 interface ChatMessage {
   id: string;
   sender: "User" | "Admin";
   userId: string;
   message: string;
-  imageUrl?: string; // Optional: URL of the image
+  imageUrl?: string;
   status: "sent" | "seen";
   time: string;
 }
@@ -22,7 +22,6 @@ interface ApiGetMessagesResponse {
   username: string;
 }
 
-// Fetcher function for SWR with authorization
 const fetcher = (url: string, token: string) => {
   if (!token) {
     throw new Error("Unauthorized");
@@ -42,7 +41,8 @@ const fetcher = (url: string, token: string) => {
 
 const AdminChat: React.FC = () => {
   const router = useRouter();
-  const { userId } = useParams(); // Destructure params directly
+  const params = useParams();
+  const userId = params?.userId;
   const token = Cookies.get("token");
 
   const [input, setInput] = useState<string>("");
@@ -52,9 +52,8 @@ const AdminChat: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Use SWR for fetching chat messages with a 1-second refresh interval
   const { data, error: fetchError } = useSWR<ApiGetMessagesResponse>(
-    token ? [`/api/admin/messages/${userId}`, token] : null,
+    token && userId ? [`/api/admin/messages/${userId}`, token] : null,
     ([url, token]: [string, string]) => fetcher(url, token),
     {
       refreshInterval: 1000, // Revalidate every 1 second
@@ -67,7 +66,6 @@ const AdminChat: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Scroll to bottom whenever new messages arrive
   useEffect(() => {
     if (data?.messages) {
       scrollToBottom();
@@ -166,9 +164,21 @@ const AdminChat: React.FC = () => {
   };
 
   // Redirect to login if there's an authentication error
-  if (fetchError?.message === "Unauthorized") {
-    router.push("/login");
-    return null;
+  useEffect(() => {
+    if (fetchError?.message === "Unauthorized") {
+      router.push("/login");
+    }
+  }, [fetchError, router]);
+
+  // If userId is not available yet, render nothing or a loader to prevent mismatches
+  if (!userId) {
+    return (
+      <AdminLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      </AdminLayout>
+    );
   }
 
   return (
