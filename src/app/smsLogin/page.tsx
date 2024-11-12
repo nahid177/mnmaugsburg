@@ -1,4 +1,5 @@
 // src/app/smsLogin/page.tsx
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -105,6 +106,16 @@ const SmsLogin: React.FC = () => {
               >
                 {loading ? 'Logging in...' : 'Login'}
               </button>
+              {/* Register Link */}
+              <div className="text-center mt-4">
+                <span className="text-sm text-gray-600">Don't have an account? </span>
+                <button
+                  onClick={() => router.push("/register")}
+                  className="text-blue-500 hover:underline text-sm"
+                >
+                  Register here
+                </button>
+              </div>
             </>
           )}
           {message && (

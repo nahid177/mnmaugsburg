@@ -1,3 +1,5 @@
+// src/app/register/page.tsx
+
 "use client";
 
 import React, { useState } from 'react';
@@ -54,12 +56,12 @@ const Register: React.FC = () => {
           <button
             onClick={handleRegister}
             className={`btn btn-primary w-full mt-4 ${loading ? 'loading' : ''}`}
-            disabled={loading || !username}
+            disabled={loading || !username.trim()}
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
           {message && (
-            <div className="alert alert-info mt-4">
+            <div className={`alert ${message.startsWith('User registered') ? 'alert-success' : 'alert-info'} mt-4`}>
               <span>{message}</span>
             </div>
           )}
