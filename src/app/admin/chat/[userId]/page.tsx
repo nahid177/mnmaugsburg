@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import useSWR, { mutate } from "swr";
 import AdminLayout from "../../AdminLayout";
 import Image from "next/image";
+import { AiOutlineClose } from "react-icons/ai"; // Importing React Icon for Close Button
 
 interface ChatMessage {
   id: string;
@@ -49,6 +50,9 @@ const AdminChat: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [sending, setSending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [modalImageSrc, setModalImageSrc] = useState<string>("");
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -181,6 +185,18 @@ const AdminChat: React.FC = () => {
     );
   }
 
+  // Function to open modal with selected image
+  const openModal = (src: string) => {
+    setModalImageSrc(src);
+    setIsModalOpen(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalImageSrc("");
+  };
+
   return (
     <AdminLayout>
       <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
@@ -215,14 +231,16 @@ const AdminChat: React.FC = () => {
                   return (
                     <div
                       key={msg.id}
-                      className={`flex ${isAdmin ? "justify-start" : "justify-end"
-                        }`}
+                      className={`flex ${
+                        isAdmin ? "justify-start" : "justify-end"
+                      }`}
                     >
                       <div className="flex flex-col space-y-1 max-w-xs">
                         {/* Sender and Time */}
                         <div
-                          className={`flex items-center space-x-2 ${isAdmin ? "" : "flex-row-reverse"
-                            }`}
+                          className={`flex items-center space-x-2 ${
+                            isAdmin ? "" : "flex-row-reverse"
+                          }`}
                         >
                           <div className="text-sm font-medium text-gray-700">
                             {msg.sender === "Admin" ? "Admin" : "You"}
@@ -234,26 +252,33 @@ const AdminChat: React.FC = () => {
                         {/* Message Bubble */}
                         {msg.message && (
                           <div
-                            className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${isAdmin ? "bg-blue-500" : "bg-green-500"
-                              }`}
+                            className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${
+                              isAdmin
+                                ? "bg-blue-500"
+                                : "bg-green-500"
+                            }`}
                           >
                             {msg.message}
                           </div>
                         )}
                         {/* Display Image if available */}
                         {msg.imageUrl && (
-                          <Image
-                            src={encodeURI(msg.imageUrl)} // Encode the URL
-                            alt="Uploaded Image"
-                            width={200} // Adjust as needed
-                            height={200} // Adjust as needed
-                            className="mt-2 max-w-full h-auto rounded-md object-cover"
-                          />
+                          <div className="mt-2">
+                            <Image
+                              src={encodeURI(msg.imageUrl)} // Encode the URL
+                              alt="Uploaded Image"
+                              width={200} // Adjust as needed
+                              height={200} // Adjust as needed
+                              className="max-w-full h-auto rounded-md object-cover cursor-pointer"
+                              onClick={() => openModal(msg.imageUrl!)}
+                            />
+                          </div>
                         )}
                         {/* Status */}
                         <div
-                          className={`text-xs text-gray-500 ${isAdmin ? "text-left" : "text-right"
-                            }`}
+                          className={`text-xs text-gray-500 ${
+                            isAdmin ? "text-left" : "text-right"
+                          }`}
                         >
                           {msg.status === "sent" ? "Sent" : "Seen"}
                         </div>
@@ -304,13 +329,15 @@ const AdminChat: React.FC = () => {
                   alt="Selected Image"
                   width={48} // 12 * 4 = 48px
                   height={48} // 12 * 4 = 48px
-                  className="object-cover rounded-md"
+                  className="object-cover rounded-md cursor-pointer"
+                  onClick={() => openModal(URL.createObjectURL(imageFile))}
                 />
                 <button
                   onClick={() => setImageFile(null)}
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs"
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs flex items-center justify-center"
+                  aria-label="Remove selected image"
                 >
-                  &times;
+                  <AiOutlineClose size={12} />
                 </button>
               </div>
             )}
@@ -328,8 +355,9 @@ const AdminChat: React.FC = () => {
             {/* Send Button */}
             <button
               onClick={handleSendMessage}
-              className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${sending ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${
+                sending ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               disabled={sending || (input.trim() === "" && !imageFile)}
             >
               {sending ? "Sending..." : "Send"}
@@ -337,6 +365,31 @@ const AdminChat: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* DaisyUI Modal for Full-Screen Image View */}
+      {isModalOpen && (
+        <div className="modal modal-open">
+          <div className="modal-box relative max-w-4xl">
+            <button
+              onClick={closeModal}
+              className="btn btn-sm btn-circle absolute right-2 top-2 bg-red-500 hover:bg-red-600"
+              aria-label="Close Image Preview"
+            >
+              <AiOutlineClose size={16} />
+            </button>
+            <div className="flex justify-center items-center">
+              <Image
+                src={modalImageSrc}
+                alt="Full-Screen Image"
+                width={800} // Adjust as needed
+                height={600} // Adjust as needed
+                className="rounded-md object-contain"
+              />
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={closeModal}></div>
+        </div>
+      )}
     </AdminLayout>
   );
 };
