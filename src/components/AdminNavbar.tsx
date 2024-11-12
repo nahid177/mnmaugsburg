@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Link from "next/link";
-import { FaPlus, FaSignOutAlt } from "react-icons/fa";
+import { FaPlus, FaSignOutAlt, FaQuestionCircle, FaEdit } from "react-icons/fa";
 
 const AdminNavbar: React.FC = () => {
   const router = useRouter();
@@ -51,6 +51,28 @@ const AdminNavbar: React.FC = () => {
             Add Information
           </button>
         </Link>
+
+        {/* Desktop Manage FAQs Button */}
+        <Link href="/admin/faq/showFAQ">
+          <button
+            className="hidden lg:flex items-center bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-md shadow-md hover:bg-green-700 transition-colors duration-200"
+            aria-label="Manage FAQs"
+          >
+            <FaQuestionCircle className="mr-2" />
+            Manage FAQs
+          </button>
+        </Link>
+
+        {/* Desktop Create FAQ Button */}
+        <Link href="/admin/faq/create">
+          <button
+            className="hidden lg:flex items-center bg-purple-600 text-white text-sm font-medium px-4 py-2 rounded-md shadow-md hover:bg-purple-700 transition-colors duration-200"
+            aria-label="Create FAQ"
+          >
+            <FaEdit className="mr-2" />
+            Create FAQ
+          </button>
+        </Link>
       </div>
 
       <div className="navbar-end flex items-center space-x-3">
@@ -64,14 +86,34 @@ const AdminNavbar: React.FC = () => {
           Logout
         </button>
 
-        {/* Mobile Add Information Button */}
+        {/* Mobile Buttons */}
         <Link href="/admin/addInformationPage">
           <button
             className="btn btn-secondary lg:hidden flex items-center text-sm font-medium text-white p-2 rounded-md shadow-md hover:bg-blue-700 transition-colors duration-200"
             aria-label="Add Information"
           >
             <FaPlus className="mr-1" />
-            Add Information
+            Add Info
+          </button>
+        </Link>
+
+        <Link href="/admin/faq/showFAQ">
+          <button
+            className="btn btn-accent lg:hidden flex items-center text-sm font-medium text-white p-2 rounded-md shadow-md hover:bg-green-700 transition-colors duration-200"
+            aria-label="Manage FAQs"
+          >
+            <FaQuestionCircle className="mr-1" />
+            FAQs
+          </button>
+        </Link>
+
+        <Link href="/admin/faq/create">
+          <button
+            className="btn btn-warning lg:hidden flex items-center text-sm font-medium text-white p-2 rounded-md shadow-md hover:bg-purple-700 transition-colors duration-200"
+            aria-label="Create FAQ"
+          >
+            <FaEdit className="mr-1" />
+            Create FAQ
           </button>
         </Link>
 
@@ -105,9 +147,34 @@ const AdminNavbar: React.FC = () => {
                 aria-label="Add Information"
               >
                 <FaPlus className="mr-2" />
-                Add Information
+                Add Info
               </Link>
             </li>
+
+            {/* Mobile Manage FAQs Link */}
+            <li>
+              <Link
+                href="/admin/faq/showFAQ"
+                className="flex items-center text-green-700 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
+                aria-label="Manage FAQs"
+              >
+                <FaQuestionCircle className="mr-2" />
+                FAQs
+              </Link>
+            </li>
+
+            {/* Mobile Create FAQ Link */}
+            <li>
+              <Link
+                href="/admin/faq/create"
+                className="flex items-center text-purple-700 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
+                aria-label="Create FAQ"
+              >
+                <FaEdit className="mr-2" />
+                Create FAQ
+              </Link>
+            </li>
+
             {/* Mobile Logout Button */}
             <li>
               <button
