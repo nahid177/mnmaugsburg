@@ -3,9 +3,8 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
-// Removed unused import of Message
 import { verifyToken } from '@/lib/auth';
-import { IUser } from '@/interfaces/IUser'; // Added import for IUser
+import { IUser } from '@/interfaces/IUser'; // Ensure this interface is correctly defined
 
 // Define an interface that extends IUser and includes sentStatsCount
 interface UserWithSentStats extends Omit<IUser, 'id'> {
@@ -34,13 +33,13 @@ export async function GET(req: Request) {
       {
         $lookup: {
           from: 'messages', // Ensure this matches the actual collection name in MongoDB
-          let: { userId: { $toString: '$_id' } }, // Convert ObjectId to string if userId in Message is string
+          let: { userId: '$_id' }, // Use ObjectId directly without converting to string
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ['$userId', '$$userId'] }, // Match userId as string
+                    { $eq: ['$userId', '$$userId'] }, // Match ObjectId directly
                     { $eq: ['$sender', 'User'] },
                     { $eq: ['$status', 'sent'] }, // Add status filter
                   ],

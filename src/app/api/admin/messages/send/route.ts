@@ -1,14 +1,23 @@
 // src/app/api/admin/messages/send/route.ts
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Message from '@/models/Message';
 import { verifyToken } from '@/lib/auth';
 
+// Define the structure of the incoming message data
+interface MessageData {
+  userId: string;
+  message?: string; // Made optional
+  imageUrl?: string; // Optional
+}
+
 export async function POST(req: Request) {
   await dbConnect();
 
   try {
-    const token = req.headers.get('Authorization')?.split(' ')[1];
+    const authHeader = req.headers.get('Authorization');
+    const token = authHeader?.split(' ')[1];
     if (!token) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
@@ -18,18 +27,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Invalid token' }, { status: 403 });
     }
 
-    const { userId, message } = await req.json();
+    const { userId, message, imageUrl }: MessageData = await req.json();
 
     // Validate input
-    if (!userId || !message) { // Removed 'status' from validation since it's set automatically
-      return NextResponse.json({ message: 'Invalid data' }, { status: 400 });
+    if (!userId || (!message && !imageUrl)) { // imageUrl is optional but at least one must be present
+      return NextResponse.json({ message: 'Invalid data. Provide at least a message or an image.' }, { status: 400 });
     }
 
     // Create a new message from admin with status 'sent'
     const newMessage = await Message.create({
       sender: 'Admin', // Indicate that the sender is admin
       userId,
-      message,
+      message: message || undefined, // Set to undefined if empty
+      imageUrl, // Include imageUrl if provided
       status: 'sent', // Set status to 'sent' by default
     });
 
@@ -38,6 +48,7 @@ export async function POST(req: Request) {
       sender: newMessage.sender,
       userId: newMessage.userId,
       message: newMessage.message,
+      imageUrl: newMessage.imageUrl, // Return imageUrl
       status: newMessage.status,
       createdAt: newMessage.createdAt,
     }, { status: 201 });

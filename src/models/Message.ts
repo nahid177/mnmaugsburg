@@ -1,47 +1,34 @@
-// models/Message.ts
+// src/models/Message.ts
 
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
-interface IMessage {
-  _id: mongoose.Types.ObjectId;
-  sender: "User" | "Admin"; // Role of the sender
-  senderName?: string; // Optional: Actual name of the sender
-  userId: string; // ID of the user
-  message: string;
-  status: "sent" | "seen"; // Status of the message
+interface IMessage extends Document {
+  sender: 'User' | 'Admin';
+  senderName?: string;
+  userId: mongoose.Types.ObjectId;
+  message?: string; // Made optional
+  imageUrl?: string;
+  status: 'sent' | 'seen';
   createdAt: Date;
   updatedAt: Date;
 }
 
-const MessageSchema = new Schema<IMessage>(
-  {
-    sender: {
-      type: String,
-      required: true,
-      enum: ["User", "Admin"], // Restricts to 'User' or 'Admin'
-    },
-    senderName: {
-      type: String,
-      required: false, // Optional: Set to true if always required
-    },
-    userId: {
-      type: String,
-      required: true,
-    },
-    message: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      required: true,
-      enum: ["sent", "seen"], // Restricts to 'sent' or 'seen'
-      default: "sent",
-    },
-  },
-  {
-    timestamps: true, // Adds createdAt and updatedAt fields automatically
-  }
-);
+const MessageSchema: Schema = new Schema({
+  sender: { type: String, enum: ['User', 'Admin'], required: true },
+  senderName: { type: String },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  message: { type: String }, // Removed 'required: true'
+  imageUrl: { type: String },
+  status: { type: String, enum: ['sent', 'seen'], default: 'sent' },
+}, { timestamps: true });
 
-export default models.Message || model<IMessage>("Message", MessageSchema);
+// Custom validation to ensure at least one of 'message' or 'imageUrl' is present
+MessageSchema.pre<IMessage>('validate', function (next) {
+  if (!this.message && !this.imageUrl) {
+    this.invalidate('message', 'Either message or imageUrl is required.');
+    this.invalidate('imageUrl', 'Either message or imageUrl is required.');
+  }
+  next();
+});
+
+export default mongoose.models.Message || mongoose.model<IMessage>('Message', MessageSchema);

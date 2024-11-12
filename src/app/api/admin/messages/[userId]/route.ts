@@ -1,6 +1,6 @@
 // src/app/api/admin/messages/[userId]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Message from '@/models/Message';
 import User from '@/models/User';
@@ -8,10 +8,11 @@ import { verifyToken } from '@/lib/auth';
 
 // Define the structure of a single chat message
 interface ChatMessage {
-  id: string; // Corrected from 'string' to string
+  id: string;
   sender: 'Admin' | 'User';
   userId: string;
-  message: string;
+  message?: string; // Made optional
+  imageUrl?: string;
   status: 'sent' | 'seen';
   time: string;
 }
@@ -29,14 +30,13 @@ interface IUserLean {
 }
 
 export async function GET(
-  req: Request,
-  context: { params: { userId: string } }
+  req: NextRequest,
+  { params }: { params: { userId: string } }
 ) {
   await dbConnect();
 
-  // **Fixed:** Await context.params before destructuring
-  const params = await context.params;
-  const { userId } = params;
+  // Correctly await the access to params.userId
+  const userId = await params.userId;
 
   try {
     // Extract and verify the token
@@ -57,7 +57,7 @@ export async function GET(
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // **New Addition:** Mark user-sent messages as 'seen'
+    // Mark user-sent messages as 'seen'
     await Message.updateMany(
       { userId, sender: 'User', status: 'sent' },
       { $set: { status: 'seen' } }
@@ -71,7 +71,8 @@ export async function GET(
       id: msg._id!.toString(),
       sender: msg.sender as 'Admin' | 'User', // Ensure correct typing
       userId: msg.userId.toString(), // Ensure userId is string
-      message: msg.message,
+      message: msg.message || "", // Ensure message is string
+      imageUrl: msg.imageUrl,
       status: msg.status as 'sent' | 'seen',
       time: msg.createdAt.toLocaleString(),
     }));

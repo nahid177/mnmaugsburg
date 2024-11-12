@@ -1,19 +1,19 @@
-// src/app/admin/chat/[userId]/page.tsx
-
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Cookies from "js-cookie";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr"; // Ensure 'mutate' is used
 import AdminLayout from "../../AdminLayout";
+import Image from "next/image"; // Import the Image component
 
 interface ChatMessage {
   id: string;
-  sender: string;
+  sender: "User" | "Admin";
   userId: string;
   message: string;
-  status: "sent" | "seen"; // Updated to reflect the enum
+  imageUrl?: string; // Optional: URL of the image
+  status: "sent" | "seen";
   time: string;
 }
 
@@ -42,11 +42,11 @@ const fetcher = (url: string, token: string) => {
 
 const AdminChat: React.FC = () => {
   const router = useRouter();
-  const params = useParams();
-  const { userId } = params;
+  const { userId } = useParams(); // Destructure params directly
   const token = Cookies.get("token");
 
   const [input, setInput] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [sending, setSending] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -68,7 +68,7 @@ const AdminChat: React.FC = () => {
   };
 
   // Scroll to bottom whenever new messages arrive
-  React.useEffect(() => {
+  useEffect(() => {
     if (data?.messages) {
       scrollToBottom();
     }
@@ -76,7 +76,7 @@ const AdminChat: React.FC = () => {
 
   // Handle sending a message
   const handleSendMessage = async () => {
-    if (input.trim() === "") return;
+    if (input.trim() === "" && !imageFile) return;
     setSending(true);
     setError("");
 
@@ -85,10 +85,42 @@ const AdminChat: React.FC = () => {
       return;
     }
 
+    let imageUrl: string | undefined;
+
+    // If an image is selected, upload it first
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("files", imageFile);
+
+      try {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.urls[0]; // Assuming single file upload
+        } else {
+          const uploadError = await uploadRes.json();
+          throw new Error(uploadError.message || "Image upload failed.");
+        }
+      } catch (err: unknown) {
+        console.error("Error uploading image:", err);
+        if (err instanceof Error) {
+          setError(err.message || "Failed to upload image.");
+        } else {
+          setError("An unexpected error occurred during image upload.");
+        }
+        setSending(false);
+        return;
+      }
+    }
+
     const messageData = {
       userId,
       message: input,
-      // status is set to 'sent' by default in the backend
+      imageUrl, // Include imageUrl if available
     };
 
     try {
@@ -103,14 +135,20 @@ const AdminChat: React.FC = () => {
 
       if (res.ok) {
         setInput("");
+        setImageFile(null);
+        mutate([`/api/admin/messages/${userId}`, token]); // Revalidate SWR data
         scrollToBottom();
       } else {
         const data = await res.json();
         setError(data.message || "Failed to send message.");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error sending message:", err);
-      setError("Network error. Please try again.");
+      if (err instanceof Error) {
+        setError("Failed to send message. Please try again.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setSending(false);
     }
@@ -118,7 +156,11 @@ const AdminChat: React.FC = () => {
 
   // Handle Enter key for sending message
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !sending && input.trim() !== "") {
+    if (
+      e.key === "Enter" &&
+      !sending &&
+      (input.trim() !== "" || imageFile)
+    ) {
       handleSendMessage();
     }
   };
@@ -175,20 +217,32 @@ const AdminChat: React.FC = () => {
                           }`}
                         >
                           <div className="text-sm font-medium text-gray-700">
-                            {msg.sender}
+                            {msg.sender === "Admin" ? "Admin" : "You"}
                           </div>
                           <time className="text-xs text-gray-400">
                             {msg.time}
                           </time>
                         </div>
                         {/* Message Bubble */}
-                        <div
-                          className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${
-                            isAdmin ? "bg-blue-500" : "bg-green-500"
-                          }`}
-                        >
-                          {msg.message}
-                        </div>
+                        {msg.message && (
+                          <div
+                            className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${
+                              isAdmin ? "bg-blue-500" : "bg-green-500"
+                            }`}
+                          >
+                            {msg.message}
+                          </div>
+                        )}
+                        {/* Display Image if available */}
+                        {msg.imageUrl && (
+                          <Image
+                            src={encodeURI(msg.imageUrl)} // Encode the URL
+                            alt="Uploaded Image"
+                            width={200} // Adjust as needed
+                            height={200} // Adjust as needed
+                            className="mt-2 max-w-full h-auto rounded-md object-cover"
+                          />
+                        )}
                         {/* Status */}
                         <div
                           className={`text-xs text-gray-500 ${
@@ -206,8 +260,56 @@ const AdminChat: React.FC = () => {
             </div>
           )}
 
-          {/* Input Box and Send Button */}
+          {/* Input Box, Image Upload, and Send Button */}
           <div className="flex items-center space-x-2">
+            {/* Image Upload Input */}
+            <label className="cursor-pointer">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-gray-600 hover:text-gray-800"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 8.828M3 5h4l3.293 3.293a1 1 0 001.414 0L14 5m0 0l3 3m-3-3v12"
+                />
+              </svg>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setImageFile(e.target.files[0]);
+                  }
+                }}
+              />
+            </label>
+
+            {/* Display Selected Image Preview */}
+            {imageFile && (
+              <div className="relative">
+                <Image
+                  src={URL.createObjectURL(imageFile)}
+                  alt="Selected Image"
+                  width={48} // 12 * 4 = 48px
+                  height={48} // 12 * 4 = 48px
+                  className="object-cover rounded-md"
+                />
+                <button
+                  onClick={() => setImageFile(null)}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
+
+            {/* Text Input */}
             <input
               type="text"
               value={input}
@@ -216,12 +318,14 @@ const AdminChat: React.FC = () => {
               placeholder="Type a message..."
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+
+            {/* Send Button */}
             <button
               onClick={handleSendMessage}
               className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${
                 sending ? "opacity-50 cursor-not-allowed" : ""
               }`}
-              disabled={sending || !input.trim()}
+              disabled={sending || (input.trim() === "" && !imageFile)}
             >
               {sending ? "Sending..." : "Send"}
             </button>
