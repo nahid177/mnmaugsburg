@@ -234,9 +234,8 @@ const ChatComponent: React.FC = () => {
                 <div className="flex flex-col space-y-1 max-w-xs">
                   {/* Sender and Time */}
                   <div
-                    className={`flex items-center space-x-2 ${
-                      isUser ? "flex-row-reverse" : ""
-                    }`}
+                    className={`flex items-center space-x-2 ${isUser ? "flex-row-reverse" : ""
+                      }`}
                   >
                     <div className="text-sm font-medium text-gray-700">
                       {isUser ? "You" : "Admin"}
@@ -246,13 +245,16 @@ const ChatComponent: React.FC = () => {
                     </time>
                   </div>
                   {/* Message Bubble */}
-                  <div
-                    className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${
-                      isUser ? "bg-green-500 " : "bg-blue-500 "
-                    }`}
-                  >
-                    {chat.message}
-                  </div>
+
+
+                  {chat.message && (
+                    <div
+                      className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${isUser ? "bg-green-500" : "bg-blue-500"
+                        }`}
+                    >
+                      {chat.message}
+                    </div>
+                  )}
                   {/* Display Image if available */}
                   {chat.imageUrl && (
                     <div className="mt-2">
@@ -267,9 +269,8 @@ const ChatComponent: React.FC = () => {
                   )}
                   {/* Status */}
                   <div
-                    className={`text-xs text-gray-500 ${
-                      isUser ? "text-right" : "text-left"
-                    }`}
+                    className={`text-xs text-gray-500 ${isUser ? "text-right" : "text-left"
+                      }`}
                   >
                     {chat.status === "sent" ? "Sent" : "Seen"}
                   </div>
@@ -350,9 +351,8 @@ const ChatComponent: React.FC = () => {
         {/* Send Button */}
         <button
           onClick={handleSendMessage}
-          className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           disabled={loading || (input.trim() === "" && !imageFile)}
         >
           {loading ? "Sending..." : "Send"}
