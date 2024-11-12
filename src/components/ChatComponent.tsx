@@ -4,7 +4,10 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import useSWR, { mutate } from "swr";
-import Image from "next/image"; // Import the Image component
+import Image from "next/image";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css"; // Import PhotoView styles
+import { TiUploadOutline } from "react-icons/ti"; // Import the TiUploadOutline icon
 
 interface ChatMessage {
   id: string;
@@ -38,6 +41,7 @@ const fetcher = (url: string, token: string) => {
 const ChatComponent: React.FC = () => {
   const [input, setInput] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -84,6 +88,21 @@ const ChatComponent: React.FC = () => {
       scrollToBottom();
     }
   }, [messages]);
+
+  // Cleanup object URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
+  // Handle image selection and create object URL
+  const handleImageSelect = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setImagePreviewUrl(url);
+  };
 
   // Send a new message to the API
   const handleSendMessage = async () => {
@@ -172,6 +191,7 @@ const ChatComponent: React.FC = () => {
 
         setInput("");
         setImageFile(null);
+        setImagePreviewUrl(null);
         scrollToBottom();
       } else {
         console.error("Failed to send message");
@@ -194,7 +214,7 @@ const ChatComponent: React.FC = () => {
 
   if (fetchError) {
     return (
-      <div className="max-w-4xl mx-auto p-6 space-y-6 bg-white rounded-lg shadow-md mt-16">
+      <div className="max-w-full sm:max-w-4xl mx-auto p-4 sm:p-6 space-y-6 bg-white rounded-lg shadow-md mt-16">
         <div className="p-4 bg-red-100 text-red-700 rounded-md">
           {error || "Failed to load messages."}
         </div>
@@ -203,162 +223,168 @@ const ChatComponent: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6 bg-white rounded-lg shadow-md mt-16">
-      {/* Error Message */}
-      {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-md">
-          {error}
-        </div>
-      )}
-
-      {/* Chat Header */}
-      <div className="text-2xl font-semibold text-gray-800">
-        Chat Support
-      </div>
-
-      {/* Chat Messages */}
-      <div className="flex flex-col space-y-4 overflow-y-auto max-h-96 px-4">
-        {(!messages || messages.length === 0) && !error && (
-          <div className="text-center text-gray-500">
-            No messages yet. Start the conversation!
+    <PhotoProvider>
+      <div className="max-w-full sm:max-w-4xl mx-auto p-4 sm:p-6 space-y-6 bg-white rounded-lg shadow-md mt-16">
+        {/* Error Message */}
+        {error && (
+          <div className="p-4 bg-red-100 text-red-700 rounded-md">
+            {error}
           </div>
         )}
-        {messages &&
-          messages.map((chat) => {
-            const isUser = chat.sender === "User";
-            return (
-              <div
-                key={chat.id}
-                className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-              >
-                <div className="flex flex-col space-y-1 max-w-xs">
-                  {/* Sender and Time */}
+
+        {/* Chat Messages */}
+        <div className="flex flex-col space-y-4 overflow-y-auto max-h-80 sm:max-h-96 lg:max-h-[500px] px-2 sm:px-4">
+          {(!messages || messages.length === 0) && !error && (
+            <div className="text-center text-gray-500">
+              No messages yet. Start the conversation!
+            </div>
+          )}
+          {messages &&
+            messages.map((chat) => {
+              const isUser = chat.sender === "User";
+              return (
+                <div
+                  key={chat.id}
+                  className={`flex ${
+                    isUser ? "justify-end" : "justify-start"
+                  }`}
+                >
                   <div
-                    className={`flex items-center space-x-2 ${isUser ? "flex-row-reverse" : ""
-                      }`}
+                    className={`flex flex-col space-y-1 max-w-xs sm:max-w-md ${
+                      isUser ? "items-end" : "items-start"
+                    }`}
                   >
-                    <div className="text-sm font-medium text-gray-700">
-                      {isUser ? "You" : "Admin"}
-                    </div>
-                    <time className="text-xs text-gray-400">
-                      {chat.time}
-                    </time>
-                  </div>
-                  {/* Message Bubble */}
-
-
-                  {chat.message && (
+                    {/* Sender and Time */}
                     <div
-                      className={`px-4 py-2 rounded-lg shadow-md text-white break-words ${isUser ? "bg-green-500" : "bg-blue-500"
-                        }`}
-                    >
-                      {chat.message}
-                    </div>
-                  )}
-                  {/* Display Image if available */}
-                  {chat.imageUrl && (
-                    <div className="mt-2">
-                      <Image
-                        src={chat.imageUrl}
-                        alt="Uploaded Image"
-                        width={200} // Adjust as needed
-                        height={200} // Adjust as needed
-                        className="rounded-md object-cover"
-                      />
-                    </div>
-                  )}
-                  {/* Status */}
-                  <div
-                    className={`text-xs text-gray-500 ${isUser ? "text-right" : "text-left"
+                      className={`flex items-center space-x-2 ${
+                        isUser ? "flex-row-reverse" : ""
                       }`}
-                  >
-                    {chat.status === "sent" ? "Sent" : "Seen"}
+                    >
+                      <div className="text-sm sm:text-base font-medium text-gray-700">
+                        {isUser ? "You" : "Admin"}
+                      </div>
+                      <time className="text-xs sm:text-sm text-gray-400">
+                        {chat.time}
+                      </time>
+                    </div>
+                    {/* Message Bubble */}
+                    {chat.message && (
+                      <div
+                        className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-md text-white break-words ${
+                          isUser ? "bg-green-500" : "bg-blue-500"
+                        }`}
+                      >
+                        {chat.message}
+                      </div>
+                    )}
+                    {/* Display Image if available */}
+                    {chat.imageUrl && (
+                      <div className="mt-2">
+                        <PhotoView src={chat.imageUrl}>
+                          <Image
+                            src={chat.imageUrl}
+                            alt="Uploaded Image"
+                            width={200} // Adjust as needed
+                            height={200} // Adjust as needed
+                            className="rounded-md object-cover cursor-pointer transition-transform transform hover:scale-105 w-full h-auto max-w-xs sm:max-w-sm lg:max-w-md"
+                            loading="lazy" // Enable lazy loading
+                          />
+                        </PhotoView>
+                      </div>
+                    )}
+                    {/* Status */}
+                    <div
+                      className={`text-xs sm:text-sm text-gray-500 ${
+                        isUser ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {chat.status === "sent" ? "Sent" : "Seen"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        <div ref={messagesEndRef} />
-      </div>
+              );
+            })}
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* Input Box, Image Upload, and Send Button */}
-      <div className="flex items-center space-x-2">
-        {/* Image Upload Input */}
-        <label className="cursor-pointer">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-gray-600 hover:text-gray-800"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828L18 8.828M3 5h4l3.293 3.293a1 1 0 001.414 0L14 5m0 0l3 3m-3-3v12"
+        {/* Input Box, Image Upload, and Send Button */}
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Image Upload Input */}
+          <label className="cursor-pointer flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex-shrink-0">
+            <TiUploadOutline className="h-6 w-6 text-gray-600 sm:h-7 sm:w-7" />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setImageFile(e.target.files[0]);
+                  handleImageSelect(e.target.files[0]);
+                }
+              }}
             />
-          </svg>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                setImageFile(e.target.files[0]);
-              }
-            }}
-          />
-        </label>
+          </label>
 
-        {/* Display Selected Image Preview */}
-        {imageFile && (
-          <div className="relative">
-            <Image
-              src={URL.createObjectURL(imageFile)}
-              alt="Selected Image"
-              width={48} // 12 * 4 = 48px (h-12)
-              height={48} // 12 * 4 = 48px (w-12)
-              className="object-cover rounded-md"
+          {/* Display Selected Image Preview */}
+          {imageFile && imagePreviewUrl && (
+            <div className="relative flex-shrink-0">
+              <PhotoView src={imagePreviewUrl}>
+                <Image
+                  src={imagePreviewUrl}
+                  alt="Selected Image"
+                  width={48} // 12 * 4 = 48px (h-12)
+                  height={48} // 12 * 4 = 48px (w-12)
+                  className="object-cover rounded-md cursor-pointer transition-transform transform hover:scale-105"
+                  loading="lazy"
+                />
+              </PhotoView>
+              <button
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreviewUrl(null);
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 text-xs sm:p-1.5 sm:text-sm"
+                aria-label="Remove Image"
+              >
+                &times;
+              </button>
+            </div>
+          )}
+
+          {/* Text Input and Send Button */}
+          <div className="flex-1 flex items-center space-x-2 sm:space-x-4">
+            {/* Text Input */}
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (
+                  e.key === "Enter" &&
+                  !loading &&
+                  (input.trim() !== "" || imageFile)
+                ) {
+                  handleSendMessage();
+                }
+              }}
+              placeholder="Type a message..."
+              className=" w-14 flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
             />
+
+            {/* Send Button */}
             <button
-              onClick={() => setImageFile(null)}
-              className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs"
+              onClick={handleSendMessage}
+              className={`px-4 sm:px-5 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 flex-shrink-0 ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading || (input.trim() === "" && !imageFile)}
             >
-              &times;
+              {loading ? "Sending..." : "Send"}
             </button>
           </div>
-        )}
-
-        {/* Text Input */}
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (
-              e.key === "Enter" &&
-              !loading &&
-              (input.trim() !== "" || imageFile)
-            ) {
-              handleSendMessage();
-            }
-          }}
-          placeholder="Type a message..."
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        {/* Send Button */}
-        <button
-          onClick={handleSendMessage}
-          className={`px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 ${loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          disabled={loading || (input.trim() === "" && !imageFile)}
-        >
-          {loading ? "Sending..." : "Send"}
-        </button>
+        </div>
       </div>
-    </div>
+    </PhotoProvider>
   );
 };
 
