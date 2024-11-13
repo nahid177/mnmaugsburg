@@ -1,38 +1,49 @@
 // src/app/api/admin/createInfo/route.ts
 
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect'; // Ensure you have a dbConnect function for MongoDB connection
-import Model from '@/models/DetailModel'; // Import the model schema
+import dbConnect from '@/lib/dbConnect'; // Ensure this correctly connects to MongoDB
+import Model from '@/models/DetailModel'; // Ensure the path is correct
 
-// Handle GET requests
-export const GET = async () => { // Removed 'request: Request' parameter
+// Handle GET requests - Fetch all information entries
+export const GET = async () => {
   await dbConnect();
 
   try {
     const models = await Model.find({});
-    return NextResponse.json(models, { status: 200 });
+    return NextResponse.json({ success: true, data: models }, { status: 200 });
   } catch (error) {
     console.error('GET /api/admin/createInfo error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch data.' },
-      { status: 400 }
+      { status: 500 }
     );
   }
 };
 
-// Handle POST requests
+// Handle POST requests - Create a new information entry
 export const POST = async (request: Request) => {
   await dbConnect();
 
   try {
     const body = await request.json();
-    const model = await Model.create(body);
-    return NextResponse.json(model, { status: 201 });
+
+    // Basic validation (extend as needed)
+    if (!body.typename || !body.bigTitleName || !body.bigTitle) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields.' },
+        { status: 400 }
+      );
+    }
+
+    // Additional validation can be implemented here
+
+    const newModel = await Model.create(body);
+    return NextResponse.json({ success: true, data: newModel }, { status: 201 });
   } catch (error) {
     console.error('POST /api/admin/createInfo error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to create data.' },
-      { status: 400 }
+      { status: 500 }
     );
   }
 };

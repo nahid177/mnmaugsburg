@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Link from "next/link";
-import { FaPlus, FaSignOutAlt, FaQuestionCircle, FaEdit } from "react-icons/fa";
+import { FaPlus, FaSignOutAlt, FaQuestionCircle, FaEdit, FaTasks } from "react-icons/fa";
 
 const AdminNavbar: React.FC = () => {
   const router = useRouter();
@@ -49,6 +49,17 @@ const AdminNavbar: React.FC = () => {
           >
             <FaPlus className="mr-2" />
             Add Information
+          </button>
+        </Link>
+
+        {/* Desktop Manage Information Button */}
+        <Link href="/admin/addInformationPage/manageInformation">
+          <button
+            className="hidden lg:flex items-center bg-teal-600 text-white text-sm font-medium px-4 py-2 rounded-md shadow-md hover:bg-teal-700 transition-colors duration-200"
+            aria-label="Manage Information"
+          >
+            <FaTasks className="mr-2" />
+            Manage Information
           </button>
         </Link>
 
@@ -97,6 +108,16 @@ const AdminNavbar: React.FC = () => {
           </button>
         </Link>
 
+        <Link href="/admin/addInformationPage/manageInformation">
+          <button
+            className="btn btn-info lg:hidden flex items-center text-sm font-medium text-white p-2 rounded-md shadow-md hover:bg-teal-700 transition-colors duration-200"
+            aria-label="Manage Information"
+          >
+            <FaTasks className="mr-1" />
+            Manage Info
+          </button>
+        </Link>
+
         <Link href="/admin/faq/showFAQ">
           <button
             className="btn btn-accent lg:hidden flex items-center text-sm font-medium text-white p-2 rounded-md shadow-md hover:bg-green-700 transition-colors duration-200"
@@ -139,43 +160,17 @@ const AdminNavbar: React.FC = () => {
             tabIndex={0}
             className="dropdown-content mt-2 p-3 shadow-lg bg-white rounded-lg w-48 space-y-2"
           >
-            {/* Mobile Add Information Link */}
             <li>
               <Link
-                href="/admin/addInformationPage"
-                className="flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
-                aria-label="Add Information"
+                href="/admin/addInformationPage/manageInformation"
+                className="flex items-center text-teal-700 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
+                aria-label="Manage Information"
               >
-                <FaPlus className="mr-2" />
-                Add Info
+                <FaTasks className="mr-2" />
+                Manage Info
               </Link>
             </li>
 
-            {/* Mobile Manage FAQs Link */}
-            <li>
-              <Link
-                href="/admin/faq/showFAQ"
-                className="flex items-center text-green-700 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
-                aria-label="Manage FAQs"
-              >
-                <FaQuestionCircle className="mr-2" />
-                FAQs
-              </Link>
-            </li>
-
-            {/* Mobile Create FAQ Link */}
-            <li>
-              <Link
-                href="/admin/faq/create"
-                className="flex items-center text-purple-700 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
-                aria-label="Create FAQ"
-              >
-                <FaEdit className="mr-2" />
-                Create FAQ
-              </Link>
-            </li>
-
-            {/* Mobile Logout Button */}
             <li>
               <button
                 className="flex items-center text-red-600 hover:bg-gray-100 p-2 rounded-md w-full transition-colors duration-200"
