@@ -8,12 +8,12 @@ import mongoose from 'mongoose';
 
 export async function GET(
   request: Request,
-  { params }: { params: { typenameID: string } }
+  { params }: { params: Promise<{ typenameID: string }> }
 ) {
   await dbConnect(); // Ensure database connection
 
   try {
-    const typenameID = params.typenameID; // Correct: No 'await'
+    const { typenameID } = await params; // Await the params
 
     console.log(`Received typenameID: "${typenameID}"`); // Debugging log
 
