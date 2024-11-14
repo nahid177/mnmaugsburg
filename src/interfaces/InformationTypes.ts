@@ -51,4 +51,5 @@ export interface Media {
     data: T;
     error?: string;
   }
-  
+  // Export 'InformationData' as 'IModel' for consistency
+export type IModel = InformationData;

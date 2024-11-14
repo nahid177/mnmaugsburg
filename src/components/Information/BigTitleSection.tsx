@@ -1,11 +1,11 @@
-// BigTitleSection.tsx
+// src/components/Information/BigTitleSection.tsx
 
 "use client";
 
 import React, { useState } from "react";
 import { BigTitleItem } from "@/interfaces/InformationTypes";
 import Image from "next/image";
-import { FaCheckCircle, FaChevronRight, FaEdit, FaTrash } from "react-icons/fa";
+import { FaCheckCircle, FaChevronRight, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
 
 interface BigTitleSectionProps {
@@ -20,12 +20,14 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
   const [editItemIndex, setEditItemIndex] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<BigTitleItem | null>(null);
 
+  // Function to handle opening the edit modal
   const handleEditClick = (index: number) => {
     setEditItemIndex(index);
     setEditFormData(bigTitleState[index]);
     setIsEditModalOpen(true);
   };
 
+  // Function to handle deleting a big title item
   const handleDeleteClick = async (index: number) => {
     if (confirm("Are you sure you want to delete this item?")) {
       const updatedBigTitle = [...bigTitleState];
@@ -33,20 +35,25 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
 
       // Update the data on the server
       try {
-        const response = await axios.put(`/api/admin/createInfo/${typenameID}`, {
+        const response = await axios.put<APIResponse<IModel>>(`/api/admin/createInfo/${typenameID}`, {
           bigTitle: updatedBigTitle,
         });
 
-        if (response.data.success) {
+        if (response.data.success && response.data.data) {
           setBigTitleState(updatedBigTitle);
           onUpdate(updatedBigTitle);
         }
-      } catch (error) {
-        console.error("Failed to delete bigTitle item:", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Failed to delete bigTitle item:", error.message);
+        } else {
+          console.error("An unexpected error occurred:", error);
+        }
       }
     }
   };
 
+  // Function to handle submitting the edit form
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editItemIndex === null || !editFormData) return;
@@ -59,11 +66,15 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
       formData.append('files', editFormData.media.image);
 
       try {
-        const uploadResponse = await axios.post('/api/upload', formData);
+        const uploadResponse = await axios.post<{ urls: string[] }>('/api/upload', formData);
         const imageUrl = uploadResponse.data.urls[0];
         editFormData.media.image = imageUrl;
-      } catch (error) {
-        console.error('Failed to upload image:', error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('Failed to upload image:', error.message);
+        } else {
+          console.error('An unexpected error occurred during image upload:', error);
+        }
       }
     }
 
@@ -73,11 +84,15 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
       formData.append('files', editFormData.media.video);
 
       try {
-        const uploadResponse = await axios.post('/api/upload', formData);
+        const uploadResponse = await axios.post<{ urls: string[] }>('/api/upload', formData);
         const videoUrl = uploadResponse.data.urls[0];
         editFormData.media.video = videoUrl;
-      } catch (error) {
-        console.error('Failed to upload video:', error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('Failed to upload video:', error.message);
+        } else {
+          console.error('An unexpected error occurred during video upload:', error);
+        }
       }
     }
 
@@ -85,18 +100,37 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
 
     // Update the data on the server
     try {
-      const response = await axios.put(`/api/admin/createInfo/${typenameID}`, {
+      const response = await axios.put<APIResponse<IModel>>(`/api/admin/createInfo/${typenameID}`, {
         bigTitle: updatedBigTitle,
       });
 
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         setBigTitleState(updatedBigTitle);
         onUpdate(updatedBigTitle);
         setIsEditModalOpen(false);
       }
-    } catch (error) {
-      console.error("Failed to update bigTitle:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Failed to update bigTitle:", error.message);
+      } else {
+        console.error("An unexpected error occurred:", error);
+      }
     }
+  };
+
+  // Function to handle adding a new Big Title Item
+  const handleAddNewItem = () => {
+    const newItem: BigTitleItem = {
+      title: '',
+      detail: '',
+      subtitle: [],
+      subdetail: [],
+      media: {},
+    };
+    setBigTitleState([...bigTitleState, newItem]);
+    setEditItemIndex(bigTitleState.length);
+    setEditFormData(newItem);
+    setIsEditModalOpen(true);
   };
 
   // Function to add a new subtitle
@@ -143,8 +177,41 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
     }
   };
 
+  // Function to handle adding/removing media files
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
+    if (e.target.files && e.target.files[0] && editFormData) {
+      setEditFormData({
+        ...editFormData,
+        media: {
+          ...editFormData.media,
+          [type]: e.target.files[0],
+        },
+      });
+    }
+  };
+
+  const handleRemoveMedia = (type: 'image' | 'video') => {
+    if (editFormData) {
+      setEditFormData({
+        ...editFormData,
+        media: {
+          ...editFormData.media,
+          [type]: '',
+        },
+      });
+    }
+  };
+
   return (
     <div className="mb-12 px-4 md:px-8">
+      {/* Add New Big Title Item Button */}
+      <div className="flex justify-end mb-4">
+        <button className="btn btn-primary flex items-center" onClick={handleAddNewItem}>
+          <FaPlus className="mr-2" />
+          Add New Big Title Item
+        </button>
+      </div>
+
       {bigTitleState.map((item: BigTitleItem, index: number) => (
         <div
           key={`${item.title}-${index}`}
@@ -165,7 +232,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
             className="text-2xl font-bold mb-4 text-center"
             style={{ color: item.titleColor || "#1A202C" }}
           >
-            {item.title}
+            {item.title || <span className="text-gray-400">Untitled</span>}
           </h2>
 
           {/* Media Section */}
@@ -193,7 +260,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                 className="text-lg mb-4"
                 style={{ color: item.detailColor || "#4A5568" }}
               >
-                {item.detail}
+                {item.detail || <span className="text-gray-400">No detail provided.</span>}
               </p>
 
               {/* Subtitles */}
@@ -206,7 +273,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                       style={{ color: item.subtitleColor || "#2D3748" }}
                     >
                       <FaCheckCircle className="text-green-500" />
-                      {subtitle}
+                      {subtitle || <span className="text-gray-400">Empty subtitle</span>}
                     </li>
                   ))}
                 </ul>
@@ -222,7 +289,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                       style={{ color: item.subdetailColor || "#718096" }}
                     >
                       <FaChevronRight className="text-blue-500" />
-                      {subdetail}
+                      {subdetail || <span className="text-gray-400">Empty subdetail</span>}
                     </li>
                   ))}
                 </ul>
@@ -255,7 +322,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
       {/* Edit Modal */}
       {isEditModalOpen && editFormData && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-3xl">
+          <div className="modal-box max-w-3xl overflow-y-auto">
             <h3 className="font-bold text-lg mb-4">Edit Big Title Item</h3>
             <form onSubmit={handleEditSubmit} className="space-y-4">
               {/* Title */}
@@ -268,8 +335,10 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                     setEditFormData({ ...editFormData, title: e.target.value })
                   }
                   className="input input-bordered"
+                  required
                 />
               </div>
+
               {/* Title Color */}
               <div className="form-control">
                 <label className="label font-semibold">Title Color</label>
@@ -282,6 +351,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                   className="w-16 h-10 p-0 border-none"
                 />
               </div>
+
               {/* Detail */}
               <div className="form-control">
                 <label className="label font-semibold">Detail</label>
@@ -291,8 +361,10 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                     setEditFormData({ ...editFormData, detail: e.target.value })
                   }
                   className="textarea textarea-bordered"
+                  required
                 />
               </div>
+
               {/* Detail Color */}
               <div className="form-control">
                 <label className="label font-semibold">Detail Color</label>
@@ -305,6 +377,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                   className="w-16 h-10 p-0 border-none"
                 />
               </div>
+
               {/* Subtitles */}
               <div className="form-control">
                 <label className="label font-semibold">Subtitles</label>
@@ -322,6 +395,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                         });
                       }}
                       className="input input-bordered flex-grow"
+                      required
                     />
                     <button
                       type="button"
@@ -334,12 +408,14 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                 ))}
                 <button
                   type="button"
-                  className="btn btn-sm btn-primary mt-2"
+                  className="btn btn-sm btn-primary mt-2 flex items-center"
                   onClick={handleAddSubtitle}
                 >
+                  <FaPlus className="mr-2" />
                   Add Subtitle
                 </button>
               </div>
+
               {/* Subtitle Color */}
               <div className="form-control">
                 <label className="label font-semibold">Subtitle Color</label>
@@ -352,6 +428,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                   className="w-16 h-10 p-0 border-none"
                 />
               </div>
+
               {/* Subdetails */}
               <div className="form-control">
                 <label className="label font-semibold">Subdetails</label>
@@ -369,6 +446,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                         });
                       }}
                       className="input input-bordered flex-grow"
+                      required
                     />
                     <button
                       type="button"
@@ -381,12 +459,14 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                 ))}
                 <button
                   type="button"
-                  className="btn btn-sm btn-primary mt-2"
+                  className="btn btn-sm btn-primary mt-2 flex items-center"
                   onClick={handleAddSubdetail}
                 >
+                  <FaPlus className="mr-2" />
                   Add Subdetail
                 </button>
               </div>
+
               {/* Subdetail Color */}
               <div className="form-control">
                 <label className="label font-semibold">Subdetail Color</label>
@@ -399,6 +479,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                   className="w-16 h-10 p-0 border-none"
                 />
               </div>
+
               {/* Media Image */}
               <div className="form-control">
                 <label className="label font-semibold">Image</label>
@@ -416,17 +497,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setEditFormData({
-                        ...editFormData,
-                        media: {
-                          ...editFormData.media,
-                          image: e.target.files[0],
-                        },
-                      });
-                    }
-                  }}
+                  onChange={(e) => handleMediaChange(e, 'image')}
                   className="file-input file-input-bordered"
                 />
                 {/* Remove Image Button */}
@@ -434,17 +505,13 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                   <button
                     type="button"
                     className="btn btn-error mt-2"
-                    onClick={() =>
-                      setEditFormData({
-                        ...editFormData,
-                        media: { ...editFormData.media, image: '' },
-                      })
-                    }
+                    onClick={() => handleRemoveMedia('image')}
                   >
                     Remove Image
                   </button>
                 )}
               </div>
+
               {/* Media Video */}
               <div className="form-control">
                 <label className="label font-semibold">Video</label>
@@ -460,17 +527,7 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                 <input
                   type="file"
                   accept="video/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      setEditFormData({
-                        ...editFormData,
-                        media: {
-                          ...editFormData.media,
-                          video: e.target.files[0],
-                        },
-                      });
-                    }
-                  }}
+                  onChange={(e) => handleMediaChange(e, 'video')}
                   className="file-input file-input-bordered"
                 />
                 {/* Remove Video Button */}
@@ -478,17 +535,13 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
                   <button
                     type="button"
                     className="btn btn-error mt-2"
-                    onClick={() =>
-                      setEditFormData({
-                        ...editFormData,
-                        media: { ...editFormData.media, video: '' },
-                      })
-                    }
+                    onClick={() => handleRemoveMedia('video')}
                   >
                     Remove Video
                   </button>
                 )}
               </div>
+
               {/* Submit Button */}
               <div className="modal-action">
                 <button
