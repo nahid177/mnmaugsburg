@@ -1,3 +1,5 @@
+// page.tsx
+
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -34,8 +36,12 @@ const CategoryPage: React.FC = () => {
       }
 
       setData(response.data.data);
-    } catch (error) {
-      console.error('Error fetching category data:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error fetching category data:', error.message);
+      } else {
+        console.error('An unexpected error occurred:', error);
+      }
       setError('Failed to fetch category data.');
     } finally {
       setLoading(false);
@@ -63,7 +69,12 @@ const CategoryPage: React.FC = () => {
       <ManageInformationLayout>
         <div className="p-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Category Details</h2>
-          <CategorySection categories={[data]} />
+          <CategorySection
+            categories={[data]}
+            onUpdate={(updatedCategories) => {
+              setData(updatedCategories[0]);
+            }}
+          />
         </div>
       </ManageInformationLayout>
     </AdminLayout>

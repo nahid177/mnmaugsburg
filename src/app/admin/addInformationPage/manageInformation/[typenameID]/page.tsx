@@ -12,7 +12,7 @@ import ManageInformationLayout from '../ManageInformationLayout';
 
 const TypenamePage: React.FC = () => {
   const params = useParams();
-  const typenameID = params.typenameID as string; // Type assertion
+  const typenameID = params.typenameID as string;
 
   const [data, setData] = useState<InformationData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,7 +21,7 @@ const TypenamePage: React.FC = () => {
   // Fetch data based on typenameID
   const fetchData = async (typenameID: string) => {
     try {
-      console.log(`Fetching data with typenameID: "${typenameID}"`); // Debugging log
+      console.log(`Fetching data with typenameID: "${typenameID}"`);
       const response = await axios.get<APIResponse<InformationData>>(`/api/admin/createInfo/${typenameID}`);
       if (!response.data.success || !response.data.data) {
         throw new Error('Invalid API response structure.');
