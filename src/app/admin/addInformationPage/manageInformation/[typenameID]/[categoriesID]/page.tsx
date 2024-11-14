@@ -1,5 +1,3 @@
-// src/app/admin/addInformationPage/manageInformation/[typenameID]/[categoryID]/page.tsx
-
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -13,23 +11,22 @@ import ManageInformationLayout from '@/app/admin/addInformationPage/manageInform
 const CategoryPage: React.FC = () => {
   const params = useParams();
   const typenameID = Array.isArray(params.typenameID) ? params.typenameID[0] ?? '' : params.typenameID ?? '';
-  const categoryID = Array.isArray(params.categoryID) ? params.categoryID[0] ?? '' : params.categoryID ?? '';
+  const categoriesID = Array.isArray(params.categoriesID) ? params.categoriesID[0] ?? '' : params.categoriesID ?? '';
 
   const [data, setData] = useState<InformationData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
-    if (!typenameID || !categoryID) {
+    if (!typenameID || !categoriesID) {
       setError('Invalid route parameters.');
       setLoading(false);
       return;
     }
 
     try {
-      console.log(`Fetching data with typenameID: "${typenameID}", categoryID: "${categoryID}"`);
       const response = await axios.get<APIResponse<InformationData>>(
-        `/api/admin/createInfo/${typenameID}/${categoryID}`
+        `/api/admin/createInfo/${typenameID}/${categoriesID}`
       );
 
       if (!response.data.success || !response.data.data) {
@@ -43,7 +40,7 @@ const CategoryPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [typenameID, categoryID]);
+  }, [typenameID, categoriesID]);
 
   useEffect(() => {
     fetchData();
@@ -57,7 +54,7 @@ const CategoryPage: React.FC = () => {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
-  if (!data || !data.categories || data.categories.length === 0) {
+  if (!data) {
     return <div className="text-center text-gray-500">No data available for this category.</div>;
   }
 
@@ -65,10 +62,8 @@ const CategoryPage: React.FC = () => {
     <AdminLayout>
       <ManageInformationLayout>
         <div className="p-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">
-            Category Details
-          </h2>
-          <CategorySection categories={data.categories} />
+          <h2 className="text-3xl font-bold text-gray-800 mb-6">Category Details</h2>
+          <CategorySection categories={[data]} />
         </div>
       </ManageInformationLayout>
     </AdminLayout>
