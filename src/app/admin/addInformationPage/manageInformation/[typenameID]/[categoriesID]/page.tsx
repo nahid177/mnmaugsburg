@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
-import { InformationData, APIResponse } from '@/interfaces/InformationTypes';
+import { Category, APIResponse } from '@/interfaces/InformationTypes';
 import CategorySection from '@/components/Information/CategorySection';
 import AdminLayout from '@/app/admin/AdminLayout';
 import ManageInformationLayout from '@/app/admin/addInformationPage/manageInformation/ManageInformationLayout';
@@ -13,7 +13,7 @@ const CategoryPage: React.FC = () => {
   const typenameID = Array.isArray(params.typenameID) ? params.typenameID[0] ?? '' : params.typenameID ?? '';
   const categoriesID = Array.isArray(params.categoriesID) ? params.categoriesID[0] ?? '' : params.categoriesID ?? '';
 
-  const [data, setData] = useState<InformationData | null>(null);
+  const [data, setData] = useState<Category | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +25,7 @@ const CategoryPage: React.FC = () => {
     }
 
     try {
-      const response = await axios.get<APIResponse<InformationData>>(
+      const response = await axios.get<APIResponse<Category>>(
         `/api/admin/createInfo/${typenameID}/${categoriesID}`
       );
 

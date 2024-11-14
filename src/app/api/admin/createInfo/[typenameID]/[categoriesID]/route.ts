@@ -3,10 +3,12 @@ import dbConnect from '@/lib/dbConnect';
 import Model from '@/models/DetailModel';
 import mongoose from 'mongoose';
 
-export async function GET(request: Request, { params }: { params: { typenameID: string; categoriesID: string } }) {
+export async function GET(request: Request, context: any) {
   await dbConnect();
 
   try {
+    // Await the params to access them correctly
+    const params = await context.params;
     const { typenameID, categoriesID } = params;
 
     // Validate ObjectId format
