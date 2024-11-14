@@ -58,7 +58,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ media }) => {
       {imagePreview && typeof media.image === 'string' && (
         <div>
           <h5 className="text-blue-600 font-semibold mb-2">Image Preview:</h5>
-          <div className="relative w-full h-64">
+          <div className="relative w-96 h-64">
             <Image
               src={imagePreview}
               alt="Media Image"
