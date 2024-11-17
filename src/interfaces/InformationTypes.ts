@@ -6,6 +6,8 @@ export interface Media {
   }
   
   export interface BigTitleItem {
+    _id: string; // Add this line
+
     title: string;
     titleColor?: string;
     detail: string;
@@ -18,6 +20,8 @@ export interface Media {
   }
   
   export interface CategoryContentItem {
+    _id: string; // Add this line
+
     title: string;
     titleColor?: string;
     detail: string;
