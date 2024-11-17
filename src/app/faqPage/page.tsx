@@ -53,7 +53,7 @@ const FAQPage = async () => {
         <Navbar />
         <TypeNameNavbar />
       </div>
-      <Head>
+      <Head >
         <title>Frequently Asked Questions | Your Company</title>
         <meta
           name="description"
@@ -78,7 +78,7 @@ const FAQPage = async () => {
           }}
         />
       </Head>
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8 h-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">
           Frequently Asked Questions
         </h1>

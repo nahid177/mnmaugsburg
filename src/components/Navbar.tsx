@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <div className="flex items- xl:gap-10 lg:gap-10  md:gap-10 gap-2 mt-9">
             <div className="rounded-r-3xl xl:w-[900px] lg:w-[450px] md:w-[310px]   w-[220px] xl:h-16 lg:h-12 md:h-12 h-8 bg-sky-600 flex items-center justify-center text-white font-semibold xl:text-2xl lg::text-xl md:text-lg text-sm">
-          Augsburg
+        MnM Augsburg
         </div> {/* Dark Blue with Text */}
       {/* Colored blocks */}
       <div className="flex xl:space-x-10 lg:space-x-10 md:space-x-10 space-x-1 ">

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const Footer: React.FC = () => {
     // State to handle chat box visibility
@@ -23,19 +24,17 @@ const Footer: React.FC = () => {
                 <div className="flex flex-col md:flex-row justify-between">
                     {/* Company Information */}
                     <div className="mb-6 md:mb-0">
-                        <div className="flex items-center mb-4">
-                            <svg
-                                width="50"
-                                height="50"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                className="text-black">
-                                {/* Include your company logo SVG path here */}
-                                <path d="M12 0C5.373 0 0 5.373 0 12c0 5.627 3.863 10.327 9 11.618V14h-3v-2h3V9.5c0-3.07 1.794-4.75 4.533-4.75 1.312 0 2.686.235 2.686.235v2.95h-1.513c-1.492 0-1.957.927-1.957 1.875V12h3.328l-.532 2H13.75v9.618C19.137 22.327 23 17.627 23 12 23 5.373 17.627 0 12 0z"></path>
-                            </svg>
-                            <span className="ml-3 text-xl font-bold">ACME Industries Ltd.</span>
+                        <div className=" items-center mb-4 ">
+                            <Image
+                                src="/mnm2.png"
+                                alt="MNMAugsburg"
+                                width={200}
+                                height={200}
+                                className="rounded-lg shadow-lg h-auto mb-8 p-5"
+                            />
+                            <span className=" ml-3 text-xl font-bold">Augsburg Ltd.</span>
                         </div>
-                        <p className="text-black">Providing reliable tech since 1992</p>
+                        
                     </div>
 
                     {/* Quick Links */}
@@ -160,7 +159,7 @@ const Footer: React.FC = () => {
                 {/* Footer Bottom */}
                 <div className="mt-8 text-center text-gray-500">
                     <p>
-                        &copy; {new Date().getFullYear()} - All rights reserved by ACME Industries Ltd.
+                        &copy; {new Date().getFullYear()} - All rights reserved by Augsburg Ltd.
                     </p>
                     <p className="mt-2">
                         <Link href="/terms">
