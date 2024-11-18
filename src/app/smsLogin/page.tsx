@@ -110,7 +110,7 @@ const SmsLogin: React.FC = () => {
               </button>
               {/* Register Link */}
               <div className="text-center mt-4">
-                <span className="text-sm text-gray-600">Don't have an account? </span>
+                <span className="text-sm text-gray-600">Don&apos;t have an account? </span>
                 <button
                   onClick={() => router.push("/register")}
                   className="text-blue-500 hover:underline text-sm"

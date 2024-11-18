@@ -8,6 +8,7 @@ import { InformationData, APIResponse } from '@/interfaces/InformationTypes';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import TypeNameNavbar from '@/components/CreateInfomation/TypeNameNavbar';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const TypePage: React.FC = () => {
   const { typenameID } = useParams() as { typenameID: string };
@@ -95,84 +96,96 @@ const TypePage: React.FC = () => {
   return (
     <div>
       <Navbar />
+      <LanguageSwitcher />
+
       <TypeNameNavbar />
-      <div className="container mx-auto p-4">
+      <div className="xl:w-[1500px] w-auto mx-auto p-8">
         <h1
-          className="text-3xl font-bold mb-4"
+          className="text-3xl font-bold mb-4 text-center"
           style={{ color: data.bigTitleNameColor || 'inherit' }}
         >
           {data.bigTitleName}
         </h1>
         {data.bigTitle.map((item) => (
           <div key={item._id} className="mb-8">
-            <h2
-              className="text-2xl font-semibold"
-              style={{ color: item.titleColor || 'inherit' }}
-            >
-              {item.title}
-            </h2>
-            <p
-              className="mt-2 text-lg"
-              style={{ color: item.detailColor || 'inherit' }}
-            >
-              {item.detail}
-            </p>
-            {/* Render subtitles and subdetails */}
-            {item.subtitle && item.subtitle.length > 0 && (
-              <div className="mt-4">
-                {item.subtitle.map((subtitle, index) => (
-                  <h3
-                    key={index}
-                    className="text-xl font-medium"
-                    style={{ color: item.subtitleColor || 'inherit' }}
-                  >
-                    {subtitle}
-                  </h3>
-                ))}
+            {/* Flex container for text and media */}
+            <div className="flex flex-col md:flex-row items-start md:items-center ">
+              {/* Text Content */}
+              <div className="md:w-1/2 md:pr-4">
+                <h2
+                  className="text-2xl font-semibold"
+                  style={{ color: item.titleColor || 'inherit' }}
+                >
+                  {item.title}
+                </h2>
+                <p
+                  className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm"
+                  style={{ color: item.detailColor || 'inherit' }}
+                >
+                  {item.detail}
+                </p>
+                <div className='flex space-x-3'>
+                    {/* Render subtitles and subdetails */}
+                {item.subtitle && item.subtitle.length > 0 && (
+                  <div className="mt-4 ">
+                    {item.subtitle.map((subtitle, index) => (
+                      <h3
+                        key={index}
+                        className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm font-medium"
+                        style={{ color: item.subtitleColor || 'inherit' }}
+                      >
+                        {subtitle}
+                      </h3>
+                    ))}
+                  </div>
+                )}
+                {item.subdetail && item.subdetail.length > 0 && (
+                  <div className="mt-4">
+                    {item.subdetail.map((subdetail, index) => (
+                      <p
+                        key={index}
+                        className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm"
+                        style={{ color: item.subdetailColor || 'inherit' }}
+                      >
+                        {subdetail}
+                      </p>
+                    ))}
+                  </div>
+                )}   
+                </div>
+           
               </div>
-            )}
-            {item.subdetail && item.subdetail.length > 0 && (
-              <div className="mt-2">
-                {item.subdetail.map((subdetail, index) => (
-                  <p
-                    key={index}
-                    className="text-base"
-                    style={{ color: item.subdetailColor || 'inherit' }}
-                  >
-                    {subdetail}
-                  </p>
-                ))}
-              </div>
-            )}
-            {/* Render media if available */}
-            {item.media && (
-              <div className="mt-4">
-                {/* Image Rendering */}
-                {item.media.image &&
-                  typeof item.media.image === 'string' &&
-                  item.media.image.trim() !== '' && (
-                    <Image
-                      src={item.media.image}
-                      alt={item.title}
-                      width={800}
-                      height={600}
-                      className="w-full h-auto rounded shadow"
-                    />
-                  )}
-                {/* Video Rendering */}
-                {item.media.video &&
-                  typeof item.media.video === 'string' &&
-                  item.media.video.trim() !== '' && (
-                    <video
-                      src={item.media.video}
-                      controls
-                      className="w-full h-auto rounded shadow mt-4"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  )}
-              </div>
-            )}
+              
+              {/* Media Content */}
+              {item.media && (
+                <div className="mt-4 md:mt-0 md:w-1/2 flex justify-center">
+                  {/* Image Rendering */}
+                  {item.media.image &&
+                    typeof item.media.image === 'string' &&
+                    item.media.image.trim() !== '' && (
+                      <Image
+                        src={item.media.image}
+                        alt={item.title}
+                        width={800}
+                        height={600}
+                        className="w-[400px] h-auto rounded shadow"
+                      />
+                    )}
+                  {/* Video Rendering */}
+                  {item.media.video &&
+                    typeof item.media.video === 'string' &&
+                    item.media.video.trim() !== '' && (
+                      <video
+                        src={item.media.video}
+                        controls
+                        className="w-full h-auto rounded shadow mt-4 md:mt-0"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    )}
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>

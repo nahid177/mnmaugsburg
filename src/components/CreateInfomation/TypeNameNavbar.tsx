@@ -45,7 +45,7 @@ const TypeNameNavbar: React.FC = () => {
   if (loading) return null; // Optionally, replace with a loading spinner
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-white shadow-md rounded-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-auto">
           {/* Centered Menu for Desktop */}

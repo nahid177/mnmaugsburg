@@ -9,34 +9,18 @@ import Navbar from '@/components/Navbar';
 import TypeNameNavbar from '@/components/CreateInfomation/TypeNameNavbar';
 import mongoose from 'mongoose'; // Needed for ObjectId type
 import { redirect } from 'next/navigation';
-
-export interface IFAQ {
-  _id: string;
-  question: string;
-  answer: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { IFAQ, IFAQFromDB } from '@/interfaces/IFAQ'; // Adjust the import path as needed
 
 const FAQPage = async () => {
   await dbConnect();
   let faqs: IFAQ[] = [];
 
   try {
-    // Define the type for faqsFromDB
-    type IFAQFromDB = {
-      _id: mongoose.Types.ObjectId;
-      question: string;
-      answer: string;
-      isActive: boolean;
-      createdAt: Date;
-      updatedAt: Date;
-    };
-
-    const faqsFromDB: IFAQFromDB[] = await FAQ.find({ isActive: true })
+    // Apply the generic to the lean method
+    const faqsFromDB = await FAQ.find({ isActive: true })
       .sort({ createdAt: -1 })
-      .lean();
+      .lean<IFAQFromDB[]>();
 
     faqs = faqsFromDB.map((faq) => ({
       _id: faq._id.toString(),
@@ -46,7 +30,7 @@ const FAQPage = async () => {
       createdAt: faq.createdAt.toISOString(),
       updatedAt: faq.updatedAt.toISOString(),
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching FAQs:', error);
 
     if (error instanceof mongoose.Error && error.name === 'MongoNetworkError') {
@@ -87,6 +71,7 @@ const FAQPage = async () => {
       </Head>
       <div>
         <Navbar />
+        <LanguageSwitcher />
         <TypeNameNavbar />
       </div>
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 h-full">
