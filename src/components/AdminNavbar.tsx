@@ -84,6 +84,25 @@ const AdminNavbar: React.FC = () => {
             Create FAQ
           </button>
         </Link>
+
+        {/* Desktop Policy Pages */}
+        <Link href="/admin/policy/GetPage">
+          <button
+            className="hidden lg:flex items-center bg-yellow-600 text-white text-sm font-medium px-4 py-2 rounded-md shadow-md hover:bg-yellow-700 transition-colors duration-200"
+            aria-label="Get Policy"
+          >
+            Get Policy
+          </button>
+        </Link>
+
+        <Link href="/admin/policy/InputPage">
+          <button
+            className="hidden lg:flex items-center bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-md shadow-md hover:bg-indigo-700 transition-colors duration-200"
+            aria-label="Input Policy"
+          >
+            Input Policy
+          </button>
+        </Link>
       </div>
 
       <div className="navbar-end flex items-center space-x-3">
@@ -180,6 +199,27 @@ const AdminNavbar: React.FC = () => {
                 <FaSignOutAlt className="mr-2" />
                 Logout
               </button>
+            </li>
+
+            {/* Mobile Policy Pages */}
+            <li>
+              <Link
+                href="/admin/policy/GetPage"
+                className="flex items-center text-yellow-600 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
+                aria-label="Get Policy"
+              >
+                Get Policy
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/admin/policy/InputPage"
+                className="flex items-center text-indigo-600 hover:bg-gray-100 p-2 rounded-md transition-colors duration-200"
+                aria-label="Input Policy"
+              >
+                Input Policy
+              </Link>
             </li>
           </ul>
         </div>
