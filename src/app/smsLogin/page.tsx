@@ -61,6 +61,8 @@ const SmsLogin: React.FC = () => {
       console.error('Login Error:', error);
       setMessage('Login failed due to a network error.');
       setMessageType('error');
+      // Redirect to the network problem page
+      router.push('/yournetworkproblem');
     } finally {
       setLoading(false);
     }

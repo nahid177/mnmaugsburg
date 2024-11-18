@@ -5,39 +5,44 @@
 import React, { useEffect, useState } from 'react';
 import { InformationData, APIResponse } from '@/interfaces/InformationTypes';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const TypeNameNavbar: React.FC = () => {
   const [data, setData] = useState<InformationData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   const pathname = usePathname();
+  const router = useRouter(); // Initialize the router
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch('/api/client/createInfo');
+        if (!res.ok) {
+          // Handle non-2xx HTTP responses
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const json: APIResponse<InformationData[]> = await res.json();
         if (json.success) {
           setData(json.data);
         } else {
-          setError(json.error || 'Failed to fetch data.');
+          // Redirect to the error page if the API response indicates failure
+          router.push('/yournetworkproblem');
         }
       } catch (err) {
         console.error('Error fetching navbar data:', err);
-        setError('An unexpected error occurred.');
+        // Redirect to the error page in case of any unexpected errors
+        router.push('/yournetworkproblem');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [router]);
 
   if (loading) return null; // Optionally, replace with a loading spinner
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
     <nav className="bg-white shadow-md">

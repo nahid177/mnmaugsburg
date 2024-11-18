@@ -33,7 +33,7 @@ const VerticalCategoryList: React.FC = () => {
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow-md xl:w-[1150px] lg:w-[900px]  md:w-[750px] w-[280px] mx-auto">
+    <div className="p-4 bg-white rounded-xl shadow-md xl:w-[550px] lg:w-[350px]  md:w-[350px] w-[280px] xl:mx-7 lg:mx-4 md:mx-3 ">
       <div className="flex flex-col gap-4">
         {data.map((item) =>
           item.categories && item.categories.length > 0 ? (

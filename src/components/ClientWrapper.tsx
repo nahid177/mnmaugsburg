@@ -1,58 +1,69 @@
-// src/components/ClientWrapper.tsx
 "use client";
 import React, { useState, useEffect } from "react";
-import { FiWifiOff } from "react-icons/fi"; // Only import the offline icon for the modal
+import { FiWifiOff } from "react-icons/fi";
 
 export default function ClientWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [isOnline, setIsOnline] = useState(true); // Initialize as `true` to prevent server-side errors
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [isSlowNetwork, setIsSlowNetwork] = useState<boolean>(false);
 
   useEffect(() => {
-    // Only run the navigator code in the browser
     const updateOnlineStatus = () => {
       setIsOnline(navigator.onLine);
     };
 
-    if (typeof window !== "undefined") {
-      // Initialize online status
-      setIsOnline(navigator.onLine);
+    const updateNetworkStatus = () => {
+      // Feature detection for connection
+      if ("connection" in navigator) {
+        const connection = (navigator as any).connection;
+        if (connection) {
+          const effectiveType = connection.effectiveType;
+          setIsSlowNetwork(effectiveType === "2g" || effectiveType === "slow-2g");
+        }
+      }
+    };
 
-      // Add event listeners
-      window.addEventListener("online", updateOnlineStatus);
-      window.addEventListener("offline", updateOnlineStatus);
+    // Set initial online status and network speed status
+    updateOnlineStatus();
+    updateNetworkStatus();
 
-      // Cleanup listeners on component unmount
-      return () => {
-        window.removeEventListener("online", updateOnlineStatus);
-        window.removeEventListener("offline", updateOnlineStatus);
-      };
+    // Add event listeners
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
+    if ("connection" in navigator) {
+      (navigator as any).connection.addEventListener("change", updateNetworkStatus);
     }
+
+    // Cleanup listeners on component unmount
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+
+      if ("connection" in navigator) {
+        (navigator as any).connection.removeEventListener("change", updateNetworkStatus);
+      }
+    };
   }, []);
 
   return (
     <>
-      {/* DaisyUI Modal for Offline Alert */}
+      {/* Offline Notification */}
       {!isOnline && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg text-red-600 flex items-center gap-2">
-              <FiWifiOff className="text-red-600" /> Offline Mode
-            </h3>
-            <p className="py-4">
-              You are offline. Some features may not be available.
-            </p>
-            <div className="modal-action">
-              <button
-                className="btn"
-                onClick={() => setIsOnline(true)} // Optionally allow the user to close the modal
-              >
-                OK
-              </button>
-            </div>
-          </div>
+        <div className="fixed top-0 left-0 right-0 bg-red-600 text-white text-sm font-medium py-2 px-4 flex items-center justify-center z-50 shadow-md">
+          <FiWifiOff className="mr-2 text-lg" />
+          <span>You are offline. Some features may not be available.</span>
+        </div>
+      )}
+
+      {/* Slow Network Notification */}
+      {isSlowNetwork && !isOnline && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-white text-sm font-medium py-2 px-4 flex items-center justify-center z-50 shadow-md">
+          <FiWifiOff className="mr-2 text-lg" />
+          <span>Your network is slow. Some features may experience buffering.</span>
         </div>
       )}
 

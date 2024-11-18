@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AdminLayout from "../../AdminLayout";
 
 interface Category {
   _id: string;
@@ -108,7 +109,8 @@ const GetPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-8 min-h-screen flex flex-col">
+    <AdminLayout>
+       <div className="container mx-auto p-8 min-h-screen flex flex-col">
       <h1 className="text-3xl font-semibold mb-6 text-center text-gray-800">
         Categories
       </h1>
@@ -201,6 +203,8 @@ const GetPage = () => {
         </div>
       )}
     </div>
+    </AdminLayout>
+   
   );
 };
 

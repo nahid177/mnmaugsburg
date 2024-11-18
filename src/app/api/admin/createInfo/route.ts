@@ -3,6 +3,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect'; // Ensure this correctly connects to MongoDB
 import Model from '@/models/DetailModel'; // Ensure the path is correct
+import mongoose from 'mongoose';
 
 // Handle GET requests - Fetch all information entries
 export const GET = async () => {
@@ -13,6 +14,11 @@ export const GET = async () => {
     return NextResponse.json({ success: true, data: models }, { status: 200 });
   } catch (error) {
     console.error('GET /api/admin/createInfo error:', error);
+     // Check for MongoDB Network Error
+     if (error instanceof mongoose.Error && error.name === "MongoNetworkError") {
+      // Redirect to the "network problem" page
+      return NextResponse.redirect("/yournetworkproblem");
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch data.' },
       { status: 500 }

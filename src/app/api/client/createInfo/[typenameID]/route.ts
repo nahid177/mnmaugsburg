@@ -37,6 +37,11 @@ export async function GET(
     return NextResponse.json({ success: true, data }, { status: 200 });
   } catch (error) {
     console.error('GET /api/admin/createInfo/[typenameID] error:', error);
+     // Check for MongoDB Network Error
+     if (error instanceof mongoose.Error && error.name === "MongoNetworkError") {
+      // Redirect to the "network problem" page
+      return NextResponse.redirect("/yournetworkproblem");
+    }
     return NextResponse.json(
       { success: false, error: 'Failed to fetch data.' },
       { status: 500 }

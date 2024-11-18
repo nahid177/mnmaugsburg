@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react'; 
 import { useRouter } from 'next/navigation';
+import AdminLayout from '../../AdminLayout';
 
 const InputPage = () => {
   const [title, setTitle] = useState('');
@@ -39,7 +40,8 @@ const InputPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-8">
+    <AdminLayout>
+       <div className="container mx-auto p-8">
       <h1 className="text-3xl font-semibold mb-6">Add New Category</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -82,6 +84,8 @@ const InputPage = () => {
         </div>
       </form>
     </div>
+    </AdminLayout>
+   
   );
 };
 

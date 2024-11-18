@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import ChatComponent from '@/components/ChatComponent';
 import MessesNavBar from '@/components/MessesNavBar';
 import Link from 'next/link';
+import TypeNameNavbar from '@/components/CreateInfomation/TypeNameNavbar';
 
 const ContactUsPage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -21,13 +22,17 @@ const ContactUsPage: React.FC = () => {
     }, []);
 
     return (
+        
         <div className='h-full'>
             <MessesNavBar />
+            <TypeNameNavbar />
+
             <div className="p-4">
                 {isLoggedIn ? (
                     <ChatComponent />
                 ) : (
                     <div className="  max-w-full sm:max-w-4xl mx-auto p-4 sm:p-6 space-y-6 bg-white rounded-lg shadow-md mt-48 mb-60 text-center">
+                        
                         <h2 className="text-2xl font-semibold text-gray-800">
                             Please Log In to Use the Chat
                         </h2>

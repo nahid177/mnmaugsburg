@@ -7,14 +7,17 @@ import FAQ from '@/models/FAQ';
 import Head from 'next/head';
 import Navbar from '@/components/Navbar';
 import TypeNameNavbar from '@/components/CreateInfomation/TypeNameNavbar';
+import mongoose from 'mongoose'; // Needed for ObjectId type
+import { redirect } from 'next/navigation';
+
 export interface IFAQ {
-    _id: string;
-    question: string;
-    answer: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-  }import mongoose from 'mongoose'; // Needed for ObjectId type
+  _id: string;
+  question: string;
+  answer: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const FAQPage = async () => {
   await dbConnect();
@@ -43,17 +46,21 @@ const FAQPage = async () => {
       createdAt: faq.createdAt.toISOString(),
       updatedAt: faq.updatedAt.toISOString(),
     }));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching FAQs:', error);
+
+    if (error instanceof mongoose.Error && error.name === 'MongoNetworkError') {
+      // Redirect to the "Network Problem" page
+      redirect('/yournetworkproblem');
+    } else {
+      // Optionally, handle other types of errors or redirect to a generic error page
+      redirect('/yournetworkproblem');
+    }
   }
 
   return (
     <>
-      <div>
-        <Navbar />
-        <TypeNameNavbar />
-      </div>
-      <Head >
+      <Head>
         <title>Frequently Asked Questions | Your Company</title>
         <meta
           name="description"
@@ -78,6 +85,10 @@ const FAQPage = async () => {
           }}
         />
       </Head>
+      <div>
+        <Navbar />
+        <TypeNameNavbar />
+      </div>
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 h-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">
           Frequently Asked Questions

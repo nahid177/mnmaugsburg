@@ -6,6 +6,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import VerticalCategoryList from '@/components/VerticalCategoryList';
+import PolicyGet from '@/components/PolicyGet';
 
 export default function Home() {
   return (
@@ -27,8 +28,9 @@ export default function Home() {
       </div>
 
       {/* New Section for Vertical Category List */}
-      <div className="xl:px-32 lg:px-16   py-12">
+      <div className="xl:px-80 lg:px-28 md:px-8 px-3  py-12 xl:flex lg:flex md:flex ">
         <VerticalCategoryList />
+        <PolicyGet />
       </div>
     </div>
   );

@@ -31,6 +31,11 @@ export async function GET(request: Request, context: any) {
     return NextResponse.json({ success: true, data: category }, { status: 200 });
   } catch (error) {
     console.error('Error fetching category data:', error);
+     // Check for MongoDB Network Error
+     if (error instanceof mongoose.Error && error.name === "MongoNetworkError") {
+      // Redirect to the "network problem" page
+      return NextResponse.redirect("/yournetworkproblem");
+    }
     return NextResponse.json({ success: false, error: 'Failed to fetch data.' }, { status: 500 });
   }
 }

@@ -74,6 +74,7 @@ const Login: React.FC = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
+      
       setToast({ type: "error", message: "An error occurred during login." });
       setLoading(false);
     }
