@@ -15,12 +15,10 @@ const TypePage: React.FC = () => {
 
   const [data, setData] = useState<InformationData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  // Removed the error state as we will handle errors via redirection
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
 
   useEffect(() => {
     if (!typenameID) {
-      // If typenameID is missing, redirect to the error page
       router.push('/yournetworkproblem');
       return;
     }
@@ -30,7 +28,6 @@ const TypePage: React.FC = () => {
         const res = await fetch(`/api/client/createInfo/${typenameID}`);
 
         if (!res.ok) {
-          // Handle non-2xx HTTP responses
           throw new Error(`HTTP error! status: ${res.status}`);
         }
 
@@ -39,12 +36,10 @@ const TypePage: React.FC = () => {
         if (json.success) {
           setData(json.data);
         } else {
-          // Redirect to the error page if the API response indicates failure
           router.push('/yournetworkproblem');
         }
       } catch (err) {
         console.error('Error fetching type data:', err);
-        // Redirect to the error page in case of any unexpected errors
         router.push('/yournetworkproblem');
       } finally {
         setLoading(false);
@@ -55,7 +50,6 @@ const TypePage: React.FC = () => {
   }, [typenameID, router]);
 
   if (loading) {
-    // Enhanced loading indicator
     return (
       <nav className="bg-white shadow-md">
         <div className="container mx-auto px-4">
@@ -89,7 +83,6 @@ const TypePage: React.FC = () => {
   }
 
   if (!data) {
-    // This case should rarely occur as errors redirect, but handle it just in case
     return <div className="p-4">No data found.</div>;
   }
 
@@ -108,7 +101,6 @@ const TypePage: React.FC = () => {
         </h1>
         {data.bigTitle.map((item) => (
           <div key={item._id} className="mb-8">
-            {/* Flex container for text and media */}
             <div className="flex flex-col md:flex-row items-start md:items-center ">
               {/* Text Content */}
               <div className="md:w-1/2 md:pr-4">
@@ -124,38 +116,43 @@ const TypePage: React.FC = () => {
                 >
                   {item.detail}
                 </p>
-                <div className='flex space-x-3'>
-                    {/* Render subtitles and subdetails */}
-                {item.subtitle && item.subtitle.length > 0 && (
-                  <div className="mt-4 ">
-                    {item.subtitle.map((subtitle, index) => (
-                      <h3
-                        key={index}
-                        className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm font-medium"
-                        style={{ color: item.subtitleColor || 'inherit' }}
-                      >
-                        {subtitle}
-                      </h3>
-                    ))}
-                  </div>
-                )}
-                {item.subdetail && item.subdetail.length > 0 && (
-                  <div className="mt-4">
-                    {item.subdetail.map((subdetail, index) => (
-                      <p
-                        key={index}
-                        className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm"
-                        style={{ color: item.subdetailColor || 'inherit' }}
-                      >
-                        {subdetail}
-                      </p>
-                    ))}
-                  </div>
-                )}   
+                <div className="mt-4 overflow-x-auto">
+                  {/* Updated Subtitles and Subdetails Rendering */}
+                  {item.subtitle && item.subdetail && item.subtitle.length > 0 && item.subdetail.length > 0 && (
+                    <table className="min-w-full table-auto border-collapse">
+                      <thead>
+                        <tr>
+                          <th
+                            className="px-4 py-2 text-left"
+                            style={{ color: item.subtitleColor || 'inherit' }}
+                          >
+                           
+                          </th>
+                          <th
+                            className="px-4 py-2 text-left"
+                            style={{ color: item.subdetailColor || 'inherit' }}
+                          >
+                          
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {item.subtitle.map((subtitle, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-4 py-2" style={{ color: item.subtitleColor || 'inherit' }}>
+                              {subtitle}
+                            </td>
+                            <td className="px-4 py-2" style={{ color: item.subdetailColor || 'inherit' }}>
+                              {item.subdetail![index] || 'N/A'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
-           
               </div>
-              
+
               {/* Media Content */}
               {item.media && (
                 <div className="mt-4 md:mt-0 md:w-1/2 flex justify-center">

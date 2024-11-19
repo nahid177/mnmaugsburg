@@ -2,6 +2,7 @@
 "use client"; // Marks this as a client component
 
 import i18n from 'i18next';
+import Link from 'next/link';
 import { useState } from 'react';
 
 const LanguageSwitcher = () => {
@@ -34,6 +35,12 @@ const LanguageSwitcher = () => {
       >
         🇩🇪 German
       </button>
+      <Link
+        href="/contactUs"
+        className="xl:px-4 xl:py-2 lg:px-4 lg:py-2 md:px-4 md:py-2 px-2 py-1 mx-1 rounded font-bold transition-colors duration-300 xl:text-base md:text-base lg:text-base text-sm bg-sky-500 text-white hover:bg-green-700"
+      >
+        Contact Us
+      </Link>
     </div>
   );
 };

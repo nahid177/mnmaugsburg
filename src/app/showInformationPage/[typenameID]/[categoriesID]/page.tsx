@@ -126,34 +126,40 @@ const CategoryPage: React.FC = () => {
                   {item.detail}
                 </p>
 
-                <div className='flex space-x-3'>
-                    {/* Render subtitles and subdetails */}
-                {item.subtitle && item.subtitle.length > 0 && (
-                  <div className="mt-4 ">
-                    {item.subtitle.map((subtitle, index) => (
-                      <h3
-                        key={index}
-                        className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm font-medium"
-                        style={{ color: item.subtitleColor || 'inherit' }}
-                      >
-                        {subtitle}
-                      </h3>
-                    ))}
-                  </div>
-                )}
-                {item.subdetail && item.subdetail.length > 0 && (
-                  <div className="mt-4">
-                    {item.subdetail.map((subdetail, index) => (
-                      <p
-                        key={index}
-                        className="mt-2 xl:text-lg lg:text-lg md:text-base text-sm"
-                        style={{ color: item.subdetailColor || 'inherit' }}
-                      >
-                        {subdetail}
-                      </p>
-                    ))}
-                  </div>
-                )}   
+                <div className="mt-4 overflow-x-auto">
+                  {/* Updated Subtitles and Subdetails Rendering */}
+                  {item.subtitle && item.subdetail && item.subtitle.length > 0 && item.subdetail.length > 0 && (
+                    <table className="min-w-full table-auto border-collapse">
+                      <thead>
+                        <tr>
+                          <th
+                            className="px-4 py-2 text-left"
+                            style={{ color: item.subtitleColor || 'inherit' }}
+                          >
+                           
+                          </th>
+                          <th
+                            className="px-4 py-2 text-left"
+                            style={{ color: item.subdetailColor || 'inherit' }}
+                          >
+                          
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {item.subtitle.map((subtitle, index) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-4 py-2 xl:text-lg lg:text-lg md:text-base text-sm " style={{ color: item.subtitleColor || 'inherit' }}>
+                              {subtitle}
+                            </td>
+                            <td className="px-4 py-2 xl:text-lg lg:text-lg md:text-base text-xs" style={{ color: item.subdetailColor || 'inherit' }}>
+                              {item.subdetail![index] || 'N/A'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
            
                 {/* End of Updated Section */}
@@ -171,7 +177,7 @@ const CategoryPage: React.FC = () => {
                         alt={item.title}
                         width={800}
                         height={600}
-                        className="w-[400px] h-auto rounded shadow"
+                        className="xl:w-[400px] lg:w-[400px] md:w-[250px] w-[200px] h-auto rounded shadow"
                       />
                     )}
                   {/* Video Rendering */}
@@ -181,7 +187,7 @@ const CategoryPage: React.FC = () => {
                       <video
                         src={item.media.video}
                         controls
-                        className="w-full h-auto rounded shadow mt-4 md:mt-0"
+                        className="xl:w-[400px] lg:w-[400px] md:w-[250px] w-[200px] h-auto rounded shadow mt-4 md:mt-0"
                       >
                         Your browser does not support the video tag.
                       </video>
