@@ -6,12 +6,12 @@ import ClientWrapper from "@/components/ClientWrapper";
 import Footer from "@/components/Footer";
 
 const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
+  src: "./fonts/RobotoCondensed-Italic-VariableFont_wght.ttf",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
+  src: "./fonts/RobotoCondensed-Italic-VariableFont_wght.ttf",
   variable: "--font-geist-mono",
   weight: "100 900",
 });

@@ -1,8 +1,9 @@
+/* globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* In styles/globals.css */
+/* Your custom styles */
 .navbar {
   display: flex;
   align-items: center;
@@ -13,7 +14,7 @@
   height: 48px;
 }
 
-.bg-blue-lightest { background-color: #d9ecf2; } /* Adjust as needed */
+.bg-blue-lightest { background-color: #d9ecf2; }
 .bg-blue-lighter { background-color: #a8d0e6; }
 .bg-blue-light { background-color: #51a4cd; }
 .bg-blue-dark {
@@ -25,6 +26,7 @@
   font-weight: bold;
   width: 208px;
 }
+
 .offline-alert {
   position: fixed;
   top: 0;
@@ -88,3 +90,4 @@
     padding: 0.75rem;
   }
 }
+
