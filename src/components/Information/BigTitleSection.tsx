@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { BigTitleItem } from "@/interfaces/InformationTypes";
+import { APIResponse, BigTitleItem, IModel } from "@/interfaces/InformationTypes";
 import Image from "next/image";
 import { FaCheckCircle, FaChevronRight, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import axios from "axios";
@@ -125,7 +125,11 @@ const BigTitleSection: React.FC<BigTitleSectionProps> = ({ bigTitle, typenameID,
       detail: '',
       subtitle: [],
       subdetail: [],
-      media: {},
+      media: {
+        image: null,
+        video: null
+      },
+      _id: ""
     };
     setBigTitleState([...bigTitleState, newItem]);
     setEditItemIndex(bigTitleState.length);

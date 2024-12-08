@@ -37,7 +37,7 @@ export async function PUT(
     }
 
     const updatedCategory = updatedData.categories.find(
-      (cat) => cat._id.toString() === categoryId
+      (cat: { _id: { toString: () => string; }; }) => cat._id.toString() === categoryId
     );
 
     return NextResponse.json({ success: true, data: updatedCategory }, { status: 200 });

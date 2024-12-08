@@ -4,7 +4,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TiUploadOutline } from "react-icons/ti";
 import { Transition } from "@headlessui/react";
 import { FiMenu, FiX } from "react-icons/fi";
 

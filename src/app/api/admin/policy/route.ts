@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect'; // Make sure to implement this
 import Category from '@/models/Category';
 
-export const GET = async (req: NextRequest) => {
+export const GET = async () => {
   await dbConnect();
   try {
     const categories = await Category.find();

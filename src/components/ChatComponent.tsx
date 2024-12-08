@@ -8,8 +8,6 @@ import Image from "next/image";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css"; // Import PhotoView styles
 import { TiUploadOutline } from "react-icons/ti"; // Import the TiUploadOutline icon
-import mongoose from "mongoose";
-import { NextResponse } from "next/server";
 import { redirect } from "next/navigation";
 
 interface ChatMessage {
@@ -75,13 +73,8 @@ const ChatComponent: React.FC = () => {
       dedupingInterval: 1000, // Deduplicate requests within 1 second
       onError: (err) => {
         console.error("Error fetching messages:", err);
-        if (error instanceof mongoose.Error && error.name === 'MongoNetworkError') {
-          // Redirect to the "Network Problem" page
-          redirect('/yournetworkproblem');
-        } else {
-          // Optionally, handle other types of errors or redirect to a generic error page
-          redirect('/yournetworkproblem');
-        }
+        // Redirect to the "Network Problem" page regardless of error type
+        redirect('/yournetworkproblem');
       },
     }
   );

@@ -1,84 +1,12 @@
-// page.tsx
+import CategoryPage from '@/components/CategoryPage';
+import React from 'react';
 
-"use client";
-
-import React, { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
-import { useParams } from 'next/navigation';
-import { Category, APIResponse } from '@/interfaces/InformationTypes';
-import CategorySection from '@/components/Information/CategorySection';
-import AdminLayout from '@/app/admin/AdminLayout';
-import ManageInformationLayout from '@/app/admin/addInformationPage/manageInformation/ManageInformationLayout';
-
-const CategoryPage: React.FC = () => {
-  const params = useParams();
-  const typenameID = Array.isArray(params.typenameID) ? params.typenameID[0] ?? '' : params.typenameID ?? '';
-  const categoriesID = Array.isArray(params.categoriesID) ? params.categoriesID[0] ?? '' : params.categoriesID ?? '';
-
-  const [data, setData] = useState<Category | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async () => {
-    if (!typenameID || !categoriesID) {
-      setError('Invalid route parameters.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.get<APIResponse<Category>>(
-        `/api/admin/createInfo/${typenameID}/${categoriesID}`
-      );
-
-      if (!response.data.success || !response.data.data) {
-        throw new Error('Invalid API response structure.');
-      }
-
-      setData(response.data.data);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error fetching category data:', error.message);
-      } else {
-        console.error('An unexpected error occurred:', error);
-      }
-      setError('Failed to fetch category data.');
-    } finally {
-      setLoading(false);
-    }
-  }, [typenameID, categoriesID]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  if (loading) {
-    return <div className="text-center text-blue-600 font-bold">Loading data, please wait...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
-
-  if (!data) {
-    return <div className="text-center text-gray-500">No data available for this category.</div>;
-  }
-
+const page = () => {
   return (
-    <AdminLayout>
-      <ManageInformationLayout>
-        <div className="p-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Category Details</h2>
-          <CategorySection
-            categories={[data]}
-            onUpdate={(updatedCategories) => {
-              setData(updatedCategories[0]);
-            }}
-          />
-        </div>
-      </ManageInformationLayout>
-    </AdminLayout>
+    <div>
+      <CategoryPage />
+    </div>
   );
 };
 
-export default CategoryPage;
+export default page;

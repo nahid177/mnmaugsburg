@@ -2,6 +2,26 @@
 import React, { useState, useEffect } from "react";
 import { FiWifiOff } from "react-icons/fi";
 
+// Step 1: Define the NetworkInformation interface if not already available
+interface NetworkInformation {
+  effectiveType: 'slow-2g' | '2g' | '3g' | '4g' | string;
+  addEventListener(
+    type: 'change',
+    listener: (this: NetworkInformation, ev: Event) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  removeEventListener(
+    type: 'change',
+    listener: (this: NetworkInformation, ev: Event) => unknown,
+    options?: boolean | EventListenerOptions
+  ): void;
+}
+
+// Step 2: Extend the Navigator interface to include the connection property
+interface NavigatorExtended extends Navigator {
+  connection?: NetworkInformation;
+}
+
 export default function ClientWrapper({
   children,
 }: {
@@ -16,13 +36,10 @@ export default function ClientWrapper({
     };
 
     const updateNetworkStatus = () => {
-      // Feature detection for connection
-      if ("connection" in navigator) {
-        const connection = (navigator as any).connection;
-        if (connection) {
-          const effectiveType = connection.effectiveType;
-          setIsSlowNetwork(effectiveType === "2g" || effectiveType === "slow-2g");
-        }
+      const nav = navigator as NavigatorExtended;
+      if (nav.connection) {
+        const effectiveType = nav.connection.effectiveType;
+        setIsSlowNetwork(effectiveType === "2g" || effectiveType === "slow-2g");
       }
     };
 
@@ -34,8 +51,9 @@ export default function ClientWrapper({
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
 
-    if ("connection" in navigator) {
-      (navigator as any).connection.addEventListener("change", updateNetworkStatus);
+    const nav = navigator as NavigatorExtended;
+    if (nav.connection) {
+      nav.connection.addEventListener("change", updateNetworkStatus);
     }
 
     // Cleanup listeners on component unmount
@@ -43,8 +61,8 @@ export default function ClientWrapper({
       window.removeEventListener("online", updateOnlineStatus);
       window.removeEventListener("offline", updateOnlineStatus);
 
-      if ("connection" in navigator) {
-        (navigator as any).connection.removeEventListener("change", updateNetworkStatus);
+      if (nav.connection) {
+        nav.connection.removeEventListener("change", updateNetworkStatus);
       }
     };
   }, []);

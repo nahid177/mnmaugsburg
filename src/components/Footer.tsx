@@ -2,21 +2,10 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
 import Image from 'next/image';
 
 const Footer: React.FC = () => {
-    // State to handle chat box visibility
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [chatMessage, setChatMessage] = useState('');
-    const [chatHistory, setChatHistory] = useState<string[]>([]);
-
-    const handleSendMessage = () => {
-        if (chatMessage.trim() !== '') {
-            setChatHistory([...chatHistory, chatMessage]);
-            setChatMessage('');
-        }
-    };
+ 
 
     return (
         <footer className="bg-sky-200 text-black py-10 relative">
@@ -32,7 +21,7 @@ const Footer: React.FC = () => {
                                 height={200}
                                 className="rounded-lg shadow-lg h-auto mb-8 p-5"
                             />
-                            <span className=" ml-3 text-xl font-bold">Augsburg Ltd.</span>
+                            <span className=" ml-3 text-xl font-bold">            MnM Augsburg GmbH                            </span>
                         </div>
                         
                     </div>
@@ -121,7 +110,7 @@ const Footer: React.FC = () => {
                                 </Link>
                                 {/* Email */}
                                 <Link
-                                    href="mailto:contact@acmeindustries.com"
+                                    href="mailto:m.bhuiyan@mnmaugsburg.de"
                                     aria-label="Email"
                                     className="hover:text-gray-400">
                                     <svg
@@ -159,18 +148,18 @@ const Footer: React.FC = () => {
                 {/* Footer Bottom */}
                 <div className="mt-8 text-center text-gray-500">
                     <p>
-                        &copy; {new Date().getFullYear()} - All rights reserved by Augsburg Ltd.
+                        &copy; {new Date().getFullYear()} - All rights reserved by  MnM Augsburg GmbH 
                     </p>
                     <p className="mt-2">
                         <Link href="/terms">
-                            <span className="hover:text-white cursor-pointer">Terms of Service</span>
+                            <span className="hover:text-white cursor-pointer">/about </span>
                         </Link>
                         {' | '}
-                        <Link href="/privacy">
+                        <Link href="/about">
                             <span className="hover:text-white cursor-pointer">Privacy Policy</span>
                         </Link>
                         {' | '}
-                        <Link href="/copyright">
+                        <Link href="/about">
                             <span className="hover:text-white cursor-pointer">Copyright</span>
                         </Link>
                     </p>
