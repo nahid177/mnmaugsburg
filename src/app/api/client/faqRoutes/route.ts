@@ -1,45 +1,31 @@
 // /pages/api/faqs/index.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { IFAQ } from '@/interfaces/IFAQ';
 import dbConnect from '@/lib/dbConnect';
 import FAQ from '@/models/FAQ';
+import { NextResponse } from 'next/server';
 // src/types/faq.ts
 
-export interface IFAQ {
-    _id: string;
-    question: string;
-    answer: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { method } = req;
-
+export async function GET() {
   await dbConnect();
 
-  switch (method) {
-    case 'GET':
-      try {
-        const faqs: IFAQ[] = await FAQ.find({ isActive: true }).sort({ createdAt: -1 });
-        res.status(200).json({ success: true, data: faqs });
-      } catch (error) {
-        console.error('Error fetching FAQs:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch FAQs' });
-      }
-      break;
-    case 'POST':
-      try {
-        const { question, answer } = req.body;
-        const newFAQ = await FAQ.create({ question, answer });
-        res.status(201).json({ success: true, data: newFAQ });
-      } catch (error) {
-        console.error('Error creating FAQ:', error);
-        res.status(500).json({ success: false, message: 'Failed to create FAQ' });
-      }
-      break;
-    default:
-      res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${method} Not Allowed`);
+  try {
+    const faqs: IFAQ[] = await FAQ.find({ isActive: true }).sort({ createdAt: -1 });
+    return NextResponse.json({ success: true, data: faqs }, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching FAQs:', error);
+    return NextResponse.json({ success: false, message: 'Failed to fetch FAQs' }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  await dbConnect();
+
+  try {
+    const { question, answer } = await req.json();
+    const newFAQ = await FAQ.create({ question, answer });
+    return NextResponse.json({ success: true, data: newFAQ }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating FAQ:', error);
+    return NextResponse.json({ success: false, message: 'Failed to create FAQ' }, { status: 500 });
   }
 }

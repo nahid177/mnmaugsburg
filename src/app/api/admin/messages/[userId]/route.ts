@@ -1,5 +1,3 @@
-// src/app/api/admin/messages/[userId]/route.ts
-
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Message from '@/models/Message';
@@ -31,12 +29,11 @@ interface IUserLean {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: { userId: string } } // Correct typing for params
 ) {
   await dbConnect();
 
-  // Correctly await the entire params object before accessing userId
-  const { userId } = await params;
+  const { userId } = params; // Access userId directly from params
 
   try {
     // Extract and verify the token

@@ -12,7 +12,7 @@ export async function GET(
   await dbConnect();
 
   try {
-    const { typenameID } = await context.params; // Await the params
+    const { typenameID } = await context.params;
 
     console.log(`Received typenameID: "${typenameID}"`);
 
@@ -36,10 +36,14 @@ export async function GET(
     }
 
     return NextResponse.json({ success: true, data }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('GET /api/admin/createInfo/[typenameID] error:', error);
+
+    // Type assertion to Error type
+    const e = error as Error;
+
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch data.' },
+      { success: false, error: e.message || 'Failed to fetch data.' },
       { status: 500 }
     );
   }
@@ -52,7 +56,7 @@ export async function PUT(
   await dbConnect();
 
   try {
-    const { typenameID } = await context.params; // Await the params
+    const { typenameID } = await context.params;
     const body = await request.json();
 
     if (!mongoose.Types.ObjectId.isValid(typenameID)) {
@@ -87,11 +91,14 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true, data: updatedData }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('PUT /api/admin/createInfo/[typenameID] error:', error);
 
+    // Type assertion to Error type
+    const e = error as Error;
+
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to update data.' },
+      { success: false, error: e.message || 'Failed to update data.' },
       { status: 500 }
     );
   }
@@ -104,7 +111,7 @@ export async function DELETE(
   await dbConnect();
 
   try {
-    const { typenameID } = await context.params; // Await the params
+    const { typenameID } = await context.params;
 
     if (!mongoose.Types.ObjectId.isValid(typenameID)) {
       return NextResponse.json(
@@ -123,10 +130,14 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('DELETE /api/admin/createInfo/[typenameID] error:', error);
+
+    // Type assertion to Error type
+    const e = error as Error;
+
     return NextResponse.json(
-      { success: false, error: 'Failed to delete data.' },
+      { success: false, error: e.message || 'Failed to delete data.' },
       { status: 500 }
     );
   }
