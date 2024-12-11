@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import TypeNameNavbar from '@/components/CreateInfomation/TypeNameNavbar';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import axios from 'axios';
 
 const TypePage: React.FC = () => {
   const { typenameID } = useParams() as { typenameID: string };
@@ -29,21 +30,17 @@ const TypePage: React.FC = () => {
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/client/createInfo/${typenameID}`);
+        const response = await axios.get<APIResponse<InformationData>>(
+          `/api/client/createInfo/${typenameID}`
+        );
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
-        const json: APIResponse<InformationData> = await res.json();
-
-        if (json.success) {
-          setData(json.data);
+        if (response.data.success) {
+          setData(response.data.data);
         } else {
           router.push('/yournetworkproblem');
         }
-      } catch (err) {
-        console.error('Error fetching type data:', err);
+      } catch (error) {
+        console.error('Error fetching type data:', error);
         router.push('/yournetworkproblem');
       } finally {
         setLoading(false);

@@ -6,8 +6,6 @@ import React, { useEffect, useState } from 'react';
 import ChatComponent from '@/components/ChatComponent';
 import MessesNavBar from '@/components/MessesNavBar';
 import Link from 'next/link';
-import TypeNameNavbar from '@/components/CreateInfomation/TypeNameNavbar';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const ContactUsPage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -26,11 +24,11 @@ const ContactUsPage: React.FC = () => {
         
         <div className='h-full'>
             <MessesNavBar />
-            <LanguageSwitcher />
+         
 
-            <TypeNameNavbar />
+         
 
-            <div className="p-4">
+            <div className="p-4 mb-12">
                 {isLoggedIn ? (
                     <ChatComponent />
                 ) : (

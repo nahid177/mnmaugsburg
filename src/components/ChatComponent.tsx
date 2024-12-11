@@ -6,9 +6,9 @@ import React, { useState, useRef, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import Image from "next/image";
 import { PhotoProvider, PhotoView } from "react-photo-view";
-import "react-photo-view/dist/react-photo-view.css"; // Import PhotoView styles
-import { TiUploadOutline } from "react-icons/ti"; // Import the TiUploadOutline icon
-import { redirect } from "next/navigation";
+import "react-photo-view/dist/react-photo-view.css";
+import { TiUploadOutline } from "react-icons/ti";
+import { useRouter } from "next/navigation";
 
 interface ChatMessage {
   id: string;
@@ -16,12 +16,12 @@ interface ChatMessage {
   senderName?: string;
   userId: string;
   message: string;
-  imageUrl?: string; // Optional: URL of the image
+  imageUrl?: string;
   status: "sent" | "seen";
   time: string;
 }
 
-// Define the fetcher function with authorization
+// Fetcher function that includes the Authorization header
 const fetcher = (url: string, token: string) => {
   if (!token) {
     throw new Error("Unauthorized");
@@ -53,6 +53,9 @@ const ChatComponent: React.FC = () => {
   const [username, setUsername] = useState<string>("You");
   const [token, setToken] = useState<string | null>(null);
 
+  // Initialize router
+  const router = useRouter();
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUserId = localStorage.getItem("userId");
@@ -71,10 +74,10 @@ const ChatComponent: React.FC = () => {
     {
       refreshInterval: 1000, // Revalidate every 1 second
       dedupingInterval: 1000, // Deduplicate requests within 1 second
-      onError: (err) => {
+      onError: (err: unknown) => {
         console.error("Error fetching messages:", err);
         // Redirect to the "Network Problem" page regardless of error type
-        redirect('/yournetworkproblem');
+        router.push('/yournetworkproblem');
       },
     }
   );
@@ -370,13 +373,13 @@ const ChatComponent: React.FC = () => {
                 }
               }}
               placeholder="Type a message..."
-              className=" w-14 flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
+              className="w-14 flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
             />
 
             {/* Send Button */}
             <button
               onClick={handleSendMessage}
-              className={`px-4 sm:px-5 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 flex-shrink-0 ${
+              className={`px-4 sm:px-5 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors duration-200 flex-shrink-0 ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
               disabled={loading || (input.trim() === "" && !imageFile)}
