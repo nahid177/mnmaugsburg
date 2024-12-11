@@ -32,12 +32,12 @@ const Footer: React.FC = () => {
                         <ul>
 
                             <li className="mb-2">
-                                <Link href="/contactUs">
+                                <Link href="/contact-us">
                                     <span className="hover:text-white cursor-pointer">Services</span>
                                 </Link>
                             </li>
                             <li className="mb-2">
-                                <Link href="/contactUs">
+                                <Link href="/contact-us">
                                     <span className="hover:text-white cursor-pointer">Contact</span>
                                 </Link>
                             </li>
@@ -55,7 +55,9 @@ const Footer: React.FC = () => {
                     <div className="flex flex-col">
                         {/* Social Links */}
                         <div className="mb-6 md:mb-4">
-                            <h6 className="text-lg font-semibold mb-4">Connect with Us</h6>
+                          <Link href="/contact-us">
+                          <h6 className="text-lg font-semibold mb-4">Connect with Us</h6>
+                          </Link>  
                             <div className="flex space-x-4">
                                 {/* Twitter */}
                                 <Link
@@ -151,15 +153,15 @@ const Footer: React.FC = () => {
                         &copy; {new Date().getFullYear()} - All rights reserved by  MnM Augsburg GmbH 
                     </p>
                     <p className="mt-2">
-                        <Link href="/terms">
+                        <Link href="/contact-us">
                             <span className="hover:text-white cursor-pointer">/about </span>
                         </Link>
                         {' | '}
-                        <Link href="/about">
+                        <Link href="/contact-us">
                             <span className="hover:text-white cursor-pointer">Privacy Policy</span>
                         </Link>
                         {' | '}
-                        <Link href="/about">
+                        <Link href="/contact-us">
                             <span className="hover:text-white cursor-pointer">Copyright</span>
                         </Link>
                     </p>
