@@ -1,16 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// src/app/api/admin/createInfo/route.ts
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect'; // Ensure this correctly connects to MongoDB
 import Model from '@/models/DetailModel'; // Ensure the path is correct
 import mongoose from 'mongoose';
 
-// Handle GET requests - Fetch all information entries
 export const GET = async () => {
   await dbConnect();
 
   try {
     const models = await Model.find({});
-    return NextResponse.json({ success: true, data: models }, { status: 200 });
-  } catch (error) {
+
+    // Set Cache-Control headers to prevent caching
+    return NextResponse.json(
+      { success: true, data: models },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
+  } catch (error: any) { // TypeScript requires type for 'error'
     console.error('GET /api/admin/createInfo error:', error);
 
     // Check for MongoDB Network Error
@@ -19,10 +33,16 @@ export const GET = async () => {
       return NextResponse.redirect("/yournetworkproblem");
     }
 
-
     return NextResponse.json(
       { success: false, error: 'Failed to fetch data.' },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
     );
   }
 };
