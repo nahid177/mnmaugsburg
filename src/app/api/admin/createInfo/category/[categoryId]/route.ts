@@ -2,8 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import Model from '@/models/DetailModel';
-import mongoose from 'mongoose';
+import Model from '@/models/DetailModel'; // Correct import
 
 export async function PUT(
   request: Request,
@@ -15,12 +14,15 @@ export async function PUT(
     const { categoryId } = await context.params;
     const body = await request.json();
 
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    // Validate categoryId as a non-empty string
+    if (typeof categoryId !== 'string' || categoryId.trim() === '') {
       return NextResponse.json(
         { success: false, error: 'Invalid categoryId.' },
         { status: 400 }
       );
     }
+
+    // Optional: Validate body structure here if needed
 
     // Update the specific category in the categories array
     const updatedData = await Model.findOneAndUpdate(
@@ -37,7 +39,7 @@ export async function PUT(
     }
 
     const updatedCategory = updatedData.categories.find(
-      (cat: { _id: { toString: () => string; }; }) => cat._id.toString() === categoryId
+      (cat: { _id: string }) => cat._id.toString() === categoryId
     );
 
     return NextResponse.json({ success: true, data: updatedCategory }, { status: 200 });
@@ -59,7 +61,8 @@ export async function DELETE(
   try {
     const { categoryId } = await context.params;
 
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    // Validate categoryId as a non-empty string
+    if (typeof categoryId !== 'string' || categoryId.trim() === '') {
       return NextResponse.json(
         { success: false, error: 'Invalid categoryId.' },
         { status: 400 }

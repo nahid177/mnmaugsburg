@@ -17,6 +17,10 @@ const TypePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
+  // State for modal
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   useEffect(() => {
     if (!typenameID) {
       router.push('/yournetworkproblem');
@@ -48,6 +52,18 @@ const TypePage: React.FC = () => {
 
     fetchData();
   }, [typenameID, router]);
+
+  // Function to open modal with selected image
+  const openModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
 
   if (loading) {
     return (
@@ -126,13 +142,13 @@ const TypePage: React.FC = () => {
                             className="px-4 py-2 text-left"
                             style={{ color: item.subtitleColor || 'inherit' }}
                           >
-                           
+                            {/* Header for Subtitle */}
                           </th>
                           <th
                             className="px-4 py-2 text-left"
                             style={{ color: item.subdetailColor || 'inherit' }}
                           >
-                          
+                            {/* Header for Subdetail */}
                           </th>
                         </tr>
                       </thead>
@@ -165,7 +181,8 @@ const TypePage: React.FC = () => {
                         alt={item.title}
                         width={800}
                         height={600}
-                        className="w-[400px] h-auto rounded shadow"
+                        className="w-[400px] h-auto rounded shadow cursor-pointer"
+                        onClick={() => openModal(item.media.image as string)} // Type Assertion Added Here
                       />
                     )}
                   {/* Video Rendering */}
@@ -186,6 +203,31 @@ const TypePage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal Implementation */}
+      {isModalOpen && selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={closeModal}
+        >
+          <div className="relative">
+            <Image
+              src={selectedImage}
+              alt="Full Screen Image"
+              width={1920}
+              height={1080}
+              className="max-w-full max-h-screen rounded shadow-lg"
+            />
+            <button
+              className="absolute top-4 right-4 text-white text-3xl font-bold"
+              onClick={closeModal}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

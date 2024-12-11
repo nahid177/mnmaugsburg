@@ -20,6 +20,10 @@ const CategoryPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter(); // Initialize the router
 
+  // State for modal
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   useEffect(() => {
     if (!typenameID || !categoriesID) {
       // If parameters are missing, redirect to the error page
@@ -55,6 +59,43 @@ const CategoryPage: React.FC = () => {
 
     fetchData();
   }, [typenameID, categoriesID, router]);
+
+  // Function to open modal with selected image
+  const openModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isModalOpen]);
+
+  // Handle closing modal with Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isModalOpen]);
 
   if (loading) {
     // Enhanced loading indicator
@@ -128,41 +169,48 @@ const CategoryPage: React.FC = () => {
 
                 <div className="mt-4 overflow-x-auto">
                   {/* Updated Subtitles and Subdetails Rendering */}
-                  {item.subtitle && item.subdetail && item.subtitle.length > 0 && item.subdetail.length > 0 && (
-                    <table className="min-w-full table-auto border-collapse">
-                      <thead>
-                        <tr>
-                          <th
-                            className="px-4 py-2 text-left"
-                            style={{ color: item.subtitleColor || 'inherit' }}
-                          >
-                           
-                          </th>
-                          <th
-                            className="px-4 py-2 text-left"
-                            style={{ color: item.subdetailColor || 'inherit' }}
-                          >
-                          
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {item.subtitle.map((subtitle, index) => (
-                          <tr key={index} className="border-t">
-                            <td className="px-4 py-2 xl:text-lg lg:text-lg md:text-base text-sm " style={{ color: item.subtitleColor || 'inherit' }}>
-                              {subtitle}
-                            </td>
-                            <td className="px-4 py-2 xl:text-lg lg:text-lg md:text-base text-xs" style={{ color: item.subdetailColor || 'inherit' }}>
-                              {item.subdetail![index] || 'N/A'}
-                            </td>
+                  {item.subtitle &&
+                    item.subdetail &&
+                    item.subtitle.length > 0 &&
+                    item.subdetail.length > 0 && (
+                      <table className="min-w-full table-auto border-collapse">
+                        <thead>
+                          <tr>
+                            <th
+                              className="px-4 py-2 text-left"
+                              style={{ color: item.subtitleColor || 'inherit' }}
+                            >
+                              {/* Header for Subtitle */}
+                            </th>
+                            <th
+                              className="px-4 py-2 text-left"
+                              style={{ color: item.subdetailColor || 'inherit' }}
+                            >
+                              {/* Header for Subdetail */}
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
+                        </thead>
+                        <tbody>
+                          {item.subtitle.map((subtitle, index) => (
+                            <tr key={index} className="border-t">
+                              <td
+                                className="px-4 py-2 xl:text-lg lg:text-lg md:text-base text-sm"
+                                style={{ color: item.subtitleColor || 'inherit' }}
+                              >
+                                {subtitle}
+                              </td>
+                              <td
+                                className="px-4 py-2 xl:text-lg lg:text-lg md:text-base text-xs"
+                                style={{ color: item.subdetailColor || 'inherit' }}
+                              >
+                                {item.subdetail![index] || 'N/A'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                 </div>
-           
-                {/* End of Updated Section */}
               </div>
 
               {/* Media Content */}
@@ -177,7 +225,8 @@ const CategoryPage: React.FC = () => {
                         alt={item.title}
                         width={800}
                         height={600}
-                        className="xl:w-[400px] lg:w-[400px] md:w-[250px] w-[200px] h-auto rounded shadow"
+                        className="xl:w-[400px] lg:w-[400px] md:w-[250px] w-[200px] h-auto rounded shadow cursor-pointer"
+                        onClick={() => openModal(item.media.image as string)} // Added onClick handler with type assertion
                       />
                     )}
                   {/* Video Rendering */}
@@ -198,6 +247,36 @@ const CategoryPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal Implementation */}
+      {isModalOpen && selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={closeModal}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div
+            className="relative"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal content
+          >
+            <Image
+              src={selectedImage}
+              alt="Full Screen Image"
+              width={1920}
+              height={1080}
+              className="max-w-full max-h-screen rounded shadow-lg"
+            />
+            <button
+              className="absolute top-4 right-4 text-white text-3xl font-bold"
+              onClick={closeModal}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
