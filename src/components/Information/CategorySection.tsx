@@ -1,12 +1,10 @@
-// CategorySection.tsx
-
 "use client";
 
 import React, { useState } from "react";
 import { Category, CategoryContentItem, APIResponse } from "@/interfaces/InformationTypes";
 import axios from "axios";
 import Image from "next/image";
-import { FaCheckCircle, FaChevronRight, FaEdit, FaTrash } from "react-icons/fa";
+import { FaCheckCircle, FaChevronRight, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 
 interface CategorySectionProps {
   categories: Category[];
@@ -15,14 +13,34 @@ interface CategorySectionProps {
 
 const CategorySection: React.FC<CategorySectionProps> = ({ categories, onUpdate }) => {
   const [categoriesState, setCategoriesState] = useState<Category[]>(categories);
+
+  // Edit Category Modal
   const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState<boolean>(false);
   const [editCategoryData, setEditCategoryData] = useState<Category | null>(null);
+
+  // Edit Content Modal
   const [isEditContentModalOpen, setIsEditContentModalOpen] = useState<boolean>(false);
   const [editContentData, setEditContentData] = useState<{
     categoryIndex: number;
     contentIndex: number;
     contentItem: CategoryContentItem;
   } | null>(null);
+
+  // Add Content Modal
+  const [isAddContentModalOpen, setIsAddContentModalOpen] = useState<boolean>(false);
+  const [addContentCategoryId, setAddContentCategoryId] = useState<string | null>(null);
+  const [newContentItemData, setNewContentItemData] = useState<CategoryContentItem>({
+    title: "",
+    titleColor: "#000000",
+    detail: "",
+    detailColor: "#000000",
+    subtitle: [],
+    subtitleColor: "#000000",
+    subdetail: [],
+    subdetailColor: "#000000",
+    media: { image: "", video: "" },
+    _id: ""
+  });
 
   // Edit Category Functions
   const handleEditCategory = (category: Category) => {
@@ -155,7 +173,82 @@ const CategorySection: React.FC<CategorySectionProps> = ({ categories, onUpdate 
     }
   };
 
-  // Functions to handle adding/removing subtitles and subdetails
+  // Add Content Functions
+  const handleAddContent = (categoryId: string) => {
+    setAddContentCategoryId(categoryId);
+    setNewContentItemData({
+      title: "",
+      titleColor: "#000000",
+      detail: "",
+      detailColor: "#000000",
+      subtitle: [],
+      subtitleColor: "#000000",
+      subdetail: [],
+      subdetailColor: "#000000",
+      media: { image: "", video: "" },
+      _id: ""
+    });
+    setIsAddContentModalOpen(true);
+  };
+
+  const handleAddContentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addContentCategoryId) return;
+  
+    const contentItem = { ...newContentItemData };
+  
+    // Handle image upload if needed
+    if (contentItem.media?.image instanceof File) {
+      const formData = new FormData();
+      formData.append('files', contentItem.media.image);
+  
+      try {
+        const uploadResponse = await axios.post('/api/upload', formData);
+        const imageUrl = uploadResponse.data.urls[0];
+        contentItem.media.image = imageUrl;
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+      }
+    }
+  
+    // Handle video upload if needed
+    if (contentItem.media?.video instanceof File) {
+      const formData = new FormData();
+      formData.append('files', contentItem.media.video);
+  
+      try {
+        const uploadResponse = await axios.post('/api/upload', formData);
+        const videoUrl = uploadResponse.data.urls[0];
+        contentItem.media.video = videoUrl;
+      } catch (error) {
+        console.error('Failed to upload video:', error);
+      }
+    }
+  
+    try {
+      // Use PUT method and send only the content item
+      const response = await axios.put<APIResponse<Category>>(
+        `/api/admin/createInfo/category/${addContentCategoryId}/content`,
+        contentItem
+      );
+  
+      if (response.data.success && response.data.data) {
+        const updatedCategories = [...categoriesState];
+        const categoryIndex = updatedCategories.findIndex(cat => cat._id === addContentCategoryId);
+        if (categoryIndex !== -1) {
+          // Replace the category in state with the updated version returned by the server
+          updatedCategories[categoryIndex] = response.data.data;
+          setCategoriesState(updatedCategories);
+          onUpdate(updatedCategories);
+        }
+        setIsAddContentModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to add content item:", error);
+    }
+  };
+  
+  // Functions to handle adding/removing subtitles and subdetails in Edit Content
   const handleAddSubtitle = () => {
     if (editContentData) {
       setEditContentData({
@@ -200,6 +293,37 @@ const CategorySection: React.FC<CategorySectionProps> = ({ categories, onUpdate 
         contentItem: { ...editContentData.contentItem, subdetail: updatedSubdetails },
       });
     }
+  };
+
+  // Functions to handle adding/removing subtitles and subdetails in Add Content
+  const handleAddNewSubtitle = () => {
+    setNewContentItemData((prev) => ({
+      ...prev,
+      subtitle: [...(prev.subtitle || []), ''],
+    }));
+  };
+
+  const handleRemoveNewSubtitle = (index: number) => {
+    setNewContentItemData((prev) => {
+      const updated = [...(prev.subtitle || [])];
+      updated.splice(index, 1);
+      return { ...prev, subtitle: updated };
+    });
+  };
+
+  const handleAddNewSubdetail = () => {
+    setNewContentItemData((prev) => ({
+      ...prev,
+      subdetail: [...(prev.subdetail || []), ''],
+    }));
+  };
+
+  const handleRemoveNewSubdetail = (index: number) => {
+    setNewContentItemData((prev) => {
+      const updated = [...(prev.subdetail || [])];
+      updated.splice(index, 1);
+      return { ...prev, subdetail: updated };
+    });
   };
 
   return (
@@ -343,6 +467,15 @@ const CategorySection: React.FC<CategorySectionProps> = ({ categories, onUpdate 
               No content available for this category.
             </p>
           )}
+
+          {/* Add Content Item Button */}
+          <button
+            className="btn btn-primary mt-4 flex items-center"
+            onClick={() => handleAddContent(category._id)}
+          >
+            <FaPlus className="mr-2" />
+            Add Content Item
+          </button>
         </div>
       ))}
 
@@ -671,6 +804,209 @@ const CategorySection: React.FC<CategorySectionProps> = ({ categories, onUpdate 
                 </button>
                 <button type="submit" className="btn btn-primary">
                   Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Content Modal */}
+      {isAddContentModalOpen && addContentCategoryId && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-3xl">
+            <h3 className="font-bold text-lg mb-4">Add Content Item</h3>
+            <form onSubmit={handleAddContentSubmit} className="space-y-4">
+              {/* Title */}
+              <div className="form-control">
+                <label className="label font-semibold">Title</label>
+                <input
+                  type="text"
+                  value={newContentItemData.title}
+                  onChange={(e) =>
+                    setNewContentItemData({ ...newContentItemData, title: e.target.value })
+                  }
+                  className="input input-bordered"
+                  required
+                />
+              </div>
+              {/* Title Color */}
+              <div className="form-control">
+                <label className="label font-semibold">Title Color</label>
+                <input
+                  type="color"
+                  value={newContentItemData.titleColor || '#000000'}
+                  onChange={(e) =>
+                    setNewContentItemData({ ...newContentItemData, titleColor: e.target.value })
+                  }
+                  className="w-16 h-10 p-0 border-none"
+                />
+              </div>
+              {/* Detail */}
+              <div className="form-control">
+                <label className="label font-semibold">Detail</label>
+                <textarea
+                  value={newContentItemData.detail}
+                  onChange={(e) =>
+                    setNewContentItemData({ ...newContentItemData, detail: e.target.value })
+                  }
+                  className="textarea textarea-bordered"
+                  required
+                />
+              </div>
+              {/* Detail Color */}
+              <div className="form-control">
+                <label className="label font-semibold">Detail Color</label>
+                <input
+                  type="color"
+                  value={newContentItemData.detailColor || '#000000'}
+                  onChange={(e) =>
+                    setNewContentItemData({ ...newContentItemData, detailColor: e.target.value })
+                  }
+                  className="w-16 h-10 p-0 border-none"
+                />
+              </div>
+              {/* Subtitles */}
+              <div className="form-control">
+                <label className="label font-semibold">Subtitles</label>
+                {newContentItemData.subtitle?.map((subtitle: string, index: number) => (
+                  <div key={index} className="flex items-center mb-2">
+                    <input
+                      type="text"
+                      value={subtitle}
+                      onChange={(e) => {
+                        const updatedSubtitles = [...(newContentItemData.subtitle || [])];
+                        updatedSubtitles[index] = e.target.value;
+                        setNewContentItemData({
+                          ...newContentItemData,
+                          subtitle: updatedSubtitles,
+                        });
+                      }}
+                      className="input input-bordered flex-grow"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-error ml-2"
+                      onClick={() => handleRemoveNewSubtitle(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary mt-2"
+                  onClick={handleAddNewSubtitle}
+                >
+                  Add Subtitle
+                </button>
+              </div>
+              {/* Subtitle Color */}
+              <div className="form-control">
+                <label className="label font-semibold">Subtitle Color</label>
+                <input
+                  type="color"
+                  value={newContentItemData.subtitleColor || '#000000'}
+                  onChange={(e) =>
+                    setNewContentItemData({ ...newContentItemData, subtitleColor: e.target.value })
+                  }
+                  className="w-16 h-10 p-0 border-none"
+                />
+              </div>
+              {/* Subdetails */}
+              <div className="form-control">
+                <label className="label font-semibold">Subdetails</label>
+                {newContentItemData.subdetail?.map((subdetail: string, index: number) => (
+                  <div key={index} className="flex items-center mb-2">
+                    <input
+                      type="text"
+                      value={subdetail}
+                      onChange={(e) => {
+                        const updatedSubdetails = [...(newContentItemData.subdetail || [])];
+                        updatedSubdetails[index] = e.target.value;
+                        setNewContentItemData({
+                          ...newContentItemData,
+                          subdetail: updatedSubdetails,
+                        });
+                      }}
+                      className="input input-bordered flex-grow"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-error ml-2"
+                      onClick={() => handleRemoveNewSubdetail(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary mt-2"
+                  onClick={handleAddNewSubdetail}
+                >
+                  Add Subdetail
+                </button>
+              </div>
+              {/* Subdetail Color */}
+              <div className="form-control">
+                <label className="label font-semibold">Subdetail Color</label>
+                <input
+                  type="color"
+                  value={newContentItemData.subdetailColor || '#000000'}
+                  onChange={(e) =>
+                    setNewContentItemData({ ...newContentItemData, subdetailColor: e.target.value })
+                  }
+                  className="w-16 h-10 p-0 border-none"
+                />
+              </div>
+              {/* Media Image */}
+              <div className="form-control">
+                <label className="label font-semibold">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setNewContentItemData({
+                        ...newContentItemData,
+                        media: { ...newContentItemData.media, image: e.target.files[0] },
+                      });
+                    }
+                  }}
+                  className="file-input file-input-bordered"
+                />
+              </div>
+              {/* Media Video */}
+              <div className="form-control">
+                <label className="label font-semibold">Video</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setNewContentItemData({
+                        ...newContentItemData,
+                        media: { ...newContentItemData.media, video: e.target.files[0] },
+                      });
+                    }
+                  }}
+                  className="file-input file-input-bordered"
+                />
+              </div>
+              {/* Submit Button */}
+              <div className="modal-action">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setIsAddContentModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Add
                 </button>
               </div>
             </form>

@@ -87,7 +87,7 @@ const TypeNameNavbar: React.FC = () => {
                       </div>
                     </Link>
                     {/* Dropdown Menu */}
-                    <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white border rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                    <div className="absolute hidden w-48 group-hover:flex flex-col mt-0 shadow-lg rounded-lg bg-white p-2 space-y-1">
                       <ul className="py-1">
                         {item.categories.map((category) => (
                           <li key={category._id}>
