@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const Footer: React.FC = () => {
- 
+
 
     return (
         <footer className="bg-sky-200 text-black py-10 relative">
@@ -21,9 +21,15 @@ const Footer: React.FC = () => {
                                 height={200}
                                 className="rounded-lg shadow-lg h-auto mb-8 p-5"
                             />
-                            <span className=" ml-3 text-xl font-bold">            MnM Augsburg GmbH                            </span>
+                            <Link href="/">
+                            <span className='font-bold'>
+                            MnM&nbsp;<span className='text-slate-800 font-extrabold'>Augs</span><span className='text-orange-600 font-extrabold'>burg</span>&nbsp;GmbH
+
+                            </span>
+
+                            </Link>
                         </div>
-                        
+
                     </div>
 
                     {/* Quick Links */}
@@ -55,9 +61,9 @@ const Footer: React.FC = () => {
                     <div className="flex flex-col">
                         {/* Social Links */}
                         <div className="mb-6 md:mb-4">
-                          <Link href="/contact-us">
-                          <h6 className="text-lg font-semibold mb-4">Connect with Us</h6>
-                          </Link>  
+                            <Link href="/contact-us">
+                                <h6 className="text-lg font-semibold mb-4">Connect with Us</h6>
+                            </Link>
                             <div className="flex space-x-4">
                                 {/* Twitter */}
                                 <Link
@@ -150,7 +156,7 @@ const Footer: React.FC = () => {
                 {/* Footer Bottom */}
                 <div className="mt-8 text-center text-gray-500">
                     <p>
-                        &copy; {new Date().getFullYear()} - All rights reserved by  MnM Augsburg GmbH 
+                        &copy; {new Date().getFullYear()} - All rights reserved by  MnM Augsburg GmbH
                     </p>
                     <p className="mt-2">
                         <Link href="/contact-us">

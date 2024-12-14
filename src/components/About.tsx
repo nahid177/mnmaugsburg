@@ -44,6 +44,11 @@ const About = () => {
     const headOfficeMembers = teamMembers.filter(member => member.location === "Germany");
     const bangladeshOfficeMembers = teamMembers.filter(member => member.location === "Bangladesh");
 
+    const openGmailCompose = (email: string | number | boolean) => {
+        const mailtoLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
+        window.open(mailtoLink, '_blank');
+    };
+
     return (
         <>
             <Navbar />
@@ -53,43 +58,29 @@ const About = () => {
             </div>
             <div className="container mx-auto p-6 max-w-screen-xl">
 
-                <h1 className="text-4xl font-bold text-center my-12 mb-16 text-gray-800">CONTACT  US</h1>
+                <h1 className="text-4xl font-bold text-center my-12 mb-16 text-gray-800">CONTACT US</h1>
 
                 {/* Germany Head Office Section */}
                 <div className="officeSection mb-24">
                     <h2 className="text-3xl font-semibold text-gray-800 mb-5">Head office</h2>
 
                     {/* Office card with nested member cards */}
-                    <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out transform hover:translate-y-2 ">
+                    <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out transform hover:translate-y-2">
                         <div className="p-4 mb-6 bg-gray-50 rounded-lg shadow-inner">
                             <h3 className="text-2xl font-semibold text-gray-800 mb-2">Office Location: Germany</h3>
                             <p className="text-sm text-gray-500 mb-2">Office Address: Bürgermeister Miehle Str 14, D-86199 Augsburg, Germany</p>
                             <p className="text-sm text-gray-500 mb-2"><strong>Office Hours:</strong></p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Monday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Tuesday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Wednesday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Thursday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Friday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Saturday:</strong> Closed
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Sunday:</strong> Closed
-                            </p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Monday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Tuesday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Wednesday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Thursday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Friday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Saturday:</strong> Closed</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Sunday:</strong> Closed</p>
                         </div>
 
                         {/* Google Maps Link */}
-                        <div className="flex items-center space-x-3 mb-4 ">
+                        <div className="flex items-center space-x-3 mb-4">
                             <FaMapMarkedAlt className="text-2xl text-red-500" />
                             <a
                                 href="https://www.google.com/maps/place/B%C3%BCrgermeister-Miehle-Stra%C3%9Fe+14,+86199+Augsburg,+Germany/@48.3357679,10.8753937,17z/data=!3m1!4b1!4m6!3m5!1s0x479ea2906ba15bd5:0x4c53f52e7424bb58!8m2!3d48.3357644!4d10.8779686!16s%2Fg%2F11gy37pmsc?entry=ttu&g_ep=EgoyMDI0MTEyNC4xIKXMDSoASAFQAw%3D%3D"
@@ -102,37 +93,43 @@ const About = () => {
                         </div>
 
                         {/* Nested member cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-[1100px]">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {headOfficeMembers.map((member, index) => (
-                                <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 hover:translate-y-1 max-w-xs mx-auto">
-                                    <h2 className="text-xl font-semibold text-gray-800 mb-2">{member.name}</h2>
+                                <div
+                                    key={index}
+                                    className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 hover:translate-y-1 mx-auto"
+                                >
+                                    <h2
+                                        className="text-xl font-semibold text-gray-800 mb-2 cursor-pointer"
+                                        onClick={() => openGmailCompose(member.email)}
+                                    >
+                                        {member.name}
+                                    </h2>
                                     <p className="text-base text-gray-600 mb-4">{member.title}</p>
                                     <div className="text-gray-500 text-sm space-y-4">
                                         <div className="flex items-center space-x-3">
                                             <FaPhoneAlt className="text-2xl text-sky-500" />
                                             <a
                                                 href={`tel:${member.contactNumber}`}
-                                                className="text-blue-500 hover:underline"
+                                                className="text-blue-500 hover:underline break-all"
                                             >
                                                 {member.contactNumber}
                                             </a>
                                         </div>
                                         <div className="flex items-center space-x-3">
                                             <FaWhatsapp className="text-2xl text-sky-500" />
-                                            <p>{member.whatsapp}</p>
+                                            <p className="break-all">{member.whatsapp}</p>
                                         </div>
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-3 break-all">
                                             <FaEnvelope className="text-2xl text-sky-500" />
-                                            <p className="text-blue-500">{member.email}</p>
+                                            <p className="text-blue-500"                                                 onClick={() => openGmailCompose(member.email)}
+                                            >{member.email}</p>
                                         </div>
                                         <div className="flex items-center space-x-3">
                                             <FaGoogle className="text-2xl text-sky-500" />
                                             <p
-                                                className="text-blue-500 cursor-pointer"
-                                                onClick={() => {
-                                                    const mailtoLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(member.email)}`;
-                                                    window.open(mailtoLink, '_blank');
-                                                }}
+                                                className="text-blue-500 cursor-pointer break-all"
+                                                onClick={() => openGmailCompose(member.email)}
                                             >
                                                 Send via Gmail
                                             </p>
@@ -155,31 +152,17 @@ const About = () => {
                             <p className="text-sm text-gray-500 mb-2">Branch: Bangladesh Branch</p>
                             <p className="text-sm text-gray-500 mb-2">Office Address: Swapno Shomo Flat B-1, House 93, Road 8, O.R. Nizam Road, Chittagong, Bangladesh</p>
                             <p className="text-sm text-gray-500 mb-2"><strong>Office Hours:</strong></p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Monday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Tuesday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Wednesday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Thursday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Friday:</strong> 9 AM to 5 PM
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Saturday:</strong> Closed
-                            </p>
-                            <p className="text-sm text-gray-500 mb-2">
-                                <strong>Sunday:</strong> Closed
-                            </p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Monday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Tuesday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Wednesday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Thursday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Friday:</strong> 9 AM to 5 PM</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Saturday:</strong> Closed</p>
+                            <p className="text-sm text-gray-500 mb-2"><strong>Sunday:</strong> Closed</p>
                         </div>
 
                         {/* Google Maps Link */}
-                        <div className="flex items-center space-x-3 mb-4 ">
+                        <div className="flex items-center space-x-3 mb-4">
                             <FaMapMarkedAlt className="text-2xl text-red-500" />
                             <a
                                 href="https://maps.app.goo.gl/dZwnigcooc3NS3nV8"
@@ -192,13 +175,21 @@ const About = () => {
                         </div>
 
                         {/* Nested member cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mx-[180px] w-[1100px]">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
                             {bangladeshOfficeMembers.map((member, index) => (
-                                <div key={index} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 hover:translate-y-1 max-w-xs mx-auto">
-                                    <h2 className="text-xl font-semibold text-gray-800 mb-2">{member.name}</h2>
+                                <div
+                                    key={index}
+                                    className="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 ease-in-out transform hover:scale-105 hover:translate-y-1 mx-auto"
+                                >
+                                    <h2
+                                        className="text-xl font-semibold text-gray-800 mb-2 cursor-pointer"
+                                        onClick={() => openGmailCompose(member.email)}
+                                    >
+                                        {member.name}
+                                    </h2>
                                     <p className="text-base text-gray-600 mb-4">{member.title}</p>
                                     <div className="text-gray-500 text-sm space-y-4">
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-3 break-all">
                                             <FaPhoneAlt className="text-2xl text-sky-500" />
                                             <a
                                                 href={`tel:${member.contactNumber}`}
@@ -207,22 +198,20 @@ const About = () => {
                                                 {member.contactNumber}
                                             </a>
                                         </div>
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-3 break-all">
                                             <FaWhatsapp className="text-2xl text-sky-500" />
                                             <p>{member.whatsapp}</p>
                                         </div>
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-3 break-all">
                                             <FaEnvelope className="text-2xl text-sky-500" />
-                                            <p className="text-blue-500">{member.email}</p>
+                                            <p className="text-blue-500"                                                 onClick={() => openGmailCompose(member.email)}
+                                            >{member.email}</p>
                                         </div>
-                                        <div className="flex items-center space-x-3">
+                                        <div className="flex items-center space-x-3 break-all">
                                             <FaGoogle className="text-2xl text-sky-500" />
                                             <p
                                                 className="text-blue-500 cursor-pointer"
-                                                onClick={() => {
-                                                    const mailtoLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(member.email)}`;
-                                                    window.open(mailtoLink, '_blank');
-                                                }}
+                                                onClick={() => openGmailCompose(member.email)}
                                             >
                                                 Send via Gmail
                                             </p>
