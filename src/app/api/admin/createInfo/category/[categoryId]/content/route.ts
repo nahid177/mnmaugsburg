@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import CategoryModel from '@/models/DetailModel';
+import Model from '@/models/DetailModel'; // Ensure this model includes categories subdocuments
+import mongoose from 'mongoose';
 
 export async function PUT(
   request: Request,
@@ -11,6 +12,14 @@ export async function PUT(
   const { categoryId } = params;
 
   try {
+    // Validate categoryId as a valid ObjectId if necessary
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid categoryId.' },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
 
     // Validate required fields
@@ -18,15 +27,6 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'Missing required fields: title, detail' },
         { status: 400 }
-      );
-    }
-
-    // Find category by ID
-    const category = await CategoryModel.findById(categoryId);
-    if (!category) {
-      return NextResponse.json(
-        { success: false, error: 'Category not found.' },
-        { status: 404 }
       );
     }
 
@@ -43,13 +43,25 @@ export async function PUT(
       media: body.media || { image: '', video: '' },
     };
 
-    // Add the new content item to the category's content array
-    category.content.push(newContentItem);
+    // Update the main document to push a new content item into the category
+    // identified by categoryId.
+    const updatedData = await Model.findOneAndUpdate(
+      { "categories._id": categoryId },
+      { $push: { "categories.$.content": newContentItem } },
+      { new: true, runValidators: true }
+    );
 
-    // Save the updated category
-    await category.save();
+    if (!updatedData) {
+      return NextResponse.json(
+        { success: false, error: 'Category not found.' },
+        { status: 404 }
+      );
+    }
 
-    return NextResponse.json({ success: true, data: category }, { status: 201 });
+    // Retrieve the updated category with the newly added content
+    const updatedCategory = updatedData.categories.find((cat: any) => cat._id.toString() === categoryId);
+
+    return NextResponse.json({ success: true, data: updatedCategory }, { status: 201 });
   } catch (error: any) {
     console.error('Error adding content item:', error);
     return NextResponse.json(
